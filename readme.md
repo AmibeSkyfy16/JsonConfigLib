@@ -4,4 +4,4 @@
 
 #### Used especially in minecraft mod dev
 
-#### For more info, have a look at the unit tests
+#### If you want to understand how this library works, clone the project and have a look at the unit test

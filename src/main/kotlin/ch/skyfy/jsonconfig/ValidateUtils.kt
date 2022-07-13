@@ -5,7 +5,7 @@ import java.util.*
 @Suppress("MemberVisibilityCanBePrivate")
 object ValidateUtils {
 
-    fun traverse(obj: Any, errors: MutableList<String?>) {
+    fun traverse(obj: Any, errors: MutableList<String>) {
         var clazz: Class<*>? = obj.javaClass
         while (clazz != null) {
             if (clazz.isPrimitive || !clazz.getPackage().name.startsWith("ch.skyfy")) return
@@ -17,8 +17,7 @@ object ValidateUtils {
                     if (next == null) errors.add(msg)
                     Objects.requireNonNull(next, msg)
                     traverse(next, errors)
-                } catch (ignored: IllegalAccessException) {
-                }
+                } catch (ignored: IllegalAccessException) { }
             }
             clazz = clazz.superclass
         }

@@ -1,0 +1,26 @@
+{
+  "groupA": [
+    {
+      "firstName": "Hadda2",
+      "lastName": "Queloz2",
+      "age": 56
+    },
+    {
+      "firstName": "Dridrou",
+      "lastName": "Queloz",
+      "age": 99
+    }
+  ],
+  "groupB": [
+    {
+      "firstName": "Hadda",
+      "lastName": "Queloz",
+      "age": 56
+    },
+    {
+      "firstName": "Dridrou",
+      "lastName": "Queloz",
+      "age": 99
+    }
+  ]
+}

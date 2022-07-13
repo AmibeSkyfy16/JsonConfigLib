@@ -6,5 +6,8 @@ data class JsonData<DATA : Validatable>(val data: DATA, val relativeFilePath: Pa
     companion object {
         inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativeFilePath: Path): JsonData<DATA> =
             JsonData(JsonManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath), relativeFilePath)
+
+        inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String): JsonData<DATA> =
+            JsonData(JsonManager.getOrCreateConfig(relativeFilePath, defaultFile), relativeFilePath)
     }
 }
