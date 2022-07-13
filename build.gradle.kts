@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.7.10"
     id("java-library")
+    `maven-publish`
 }
 
 group = "ch.skyfy.jsonconfig"
@@ -15,6 +16,9 @@ repositories {
 dependencies {
 //    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.10")
 
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+
+
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
     implementation("com.google.code.gson:gson:2.9.0")
 
@@ -24,20 +28,39 @@ dependencies {
 //    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.7.10")
 }
 
-tasks{
+tasks {
 
     val javaVersion = JavaVersion.VERSION_17
 
-    withType<KotlinCompile>{
+    withType<KotlinCompile> {
         kotlinOptions.jvmTarget = javaVersion.toString()
     }
 
-    withType<JavaCompile>{
+    withType<JavaCompile> {
         options.release.set(javaVersion.toString().toInt())
         options.encoding = "UTF-8"
     }
 
-    test{
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    jar {
+//        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        manifest {
+            attributes(
+                mapOf(
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to project.version
+                )
+            )
+        }
+//        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+//        from(java.sourceSets.main.get().output)
+    }
+
+    test {
         useJUnitPlatform()
 
         testLogging {
@@ -47,7 +70,15 @@ tasks{
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = project.group.toString()
+            artifactId = "json-config"
+            version = project.version.toString()
+
+            from(components["java"])
+        }
+    }
+}
