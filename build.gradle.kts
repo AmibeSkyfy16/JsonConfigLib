@@ -1,25 +1,27 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
 
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.7.10"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10"
     id("java-library")
     `maven-publish`
+    idea
 }
 
 group = "ch.skyfy.jsonconfig"
-version = "1.0-SNAPSHOT"
+version = "2.0"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
-    implementation("org.apache.logging.log4j:log4j-core:2.18.0")
+    implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
+    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
 }
@@ -40,6 +42,16 @@ tasks {
     java {
         withSourcesJar()
         withJavadocJar()
+
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(javaVersion.toString()))
+            vendor.set(JvmVendorSpec.BELLSOFT)
+        }
+    }
+
+    javadoc {
+        options.encoding = "UTF-8"
+        options.source = javaVersion.toString()
     }
 
     jar {
@@ -72,6 +84,32 @@ publishing {
             version = project.version.toString()
 
             from(components["java"])
+
+            pom {
+                name.set("json-config")
+                description.set("a tiny json config library used for minecraft mod dev")
+
+                licenses {
+                    license {
+                        name.set("The MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            credentials {
+                val properties = Properties()
+                properties.load(file("C:\\Users\\Skyfy16\\.gradle\\test.properties").inputStream())
+                username = "${properties["USERNAME"]}"
+                password = "${properties["PASSWORD"]}"
+            }
+
+            url = uri("https://maven.pkg.jetbrains.space/amibeskyfy16/p/jsonconfig/json-config")
         }
     }
 }

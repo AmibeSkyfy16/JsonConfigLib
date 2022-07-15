@@ -28,7 +28,7 @@ interface Validatable {
         try {
             ValidateUtils.traverse(this, errors)
         } catch (e: NullPointerException) {
-            errors.forEach(LOGGER::fatal)
+            errors.forEach(LOGGER::error)
 //            LOGGER.fatal("FATAL ERROR")
 //            throw java.lang.RuntimeException(e)
         }
@@ -40,8 +40,8 @@ interface Validatable {
      */
     fun confirmValidate(errors: MutableList<String>){
         if(errors.size != 0){
-            LOGGER.fatal("Some json file are not valid")
-            errors.forEach(LOGGER::fatal)
+            LOGGER.error("Some json file are not valid")
+            errors.forEach(LOGGER::error)
             throw RuntimeException()
         }
     }

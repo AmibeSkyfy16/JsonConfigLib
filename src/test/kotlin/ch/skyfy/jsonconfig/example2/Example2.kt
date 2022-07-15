@@ -12,7 +12,6 @@ class Example2 {
 
     @Test
     fun example2() {
-
         // First, you have to load the configs. After that we can access them from anywhere in the code
 
         // If this is the first time, then no json files representing the configs exist.

@@ -19,13 +19,17 @@ import kotlin.reflect.full.createInstance
 
 object JsonManager {
 
+    val defaultJson = Json {
+        prettyPrint = true
+        isLenient = true
+        encodeDefaults = true
+        allowStructuredMapKeys = true
+        allowSpecialFloatingPointValues = true
+    }
+
     inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(
         file: Path,
-        json: Json = Json {
-            prettyPrint = true
-            isLenient = true
-            encodeDefaults = true
-        }
+        json: Json = defaultJson
     ): DATA {
 
         try {
@@ -39,11 +43,7 @@ object JsonManager {
     inline fun <reified DATA : Validatable> getOrCreateConfig(
         file: Path,
         defaultFile: String,
-        json: Json = Json {
-            prettyPrint = true
-            isLenient = true
-            encodeDefaults = true
-        }
+        json: Json = defaultJson
     ): DATA {
         try {
             val d: DATA = if (file.exists()) get(file, json)
@@ -54,45 +54,25 @@ object JsonManager {
     }
 
     @Throws(IOException::class)
-    inline fun <reified DATA : Validatable> get(file: Path, json: Json): DATA =
-        json.decodeFromStream(file.inputStream())
-//        Files.newBufferedReader(file).use { reader ->
-//            return json.decodeFromStream(file.inputStream())
-//            return gson.fromJson(reader, DATA::class.java)
-//        }
+    inline fun <reified DATA : Validatable> get(file: Path, json: Json = defaultJson): DATA = json.decodeFromStream(file.inputStream())
 
     @Throws(IOException::class)
     inline fun <reified DATA : Validatable> save(
         config: DATA,
         file: Path,
-        json: Json = Json {
-            prettyPrint = true
-            isLenient = true
-            encodeDefaults = true
-        }
+        json: Json = defaultJson
     ): DATA {
         file.parent.createDirectories()
         json.encodeToStream(config , file.outputStream())
-//        Files.newBufferedWriter(file).use { writer ->
-//            gson.toJson(config, DATA::class.java, writer)
-//        }
         return config
     }
 
     @Throws(IOException::class)
     inline fun <reified DATA : Validatable> save(
         jsonData: JsonData<DATA>,
-        json: Json = Json {
-            prettyPrint = true
-            isLenient = true
-            encodeDefaults = true
-        }
-    ) {
-        json.encodeToStream(jsonData.data , jsonData.relativeFilePath.outputStream())
-//        Files.newBufferedWriter(jsonData.relativeFilePath).use { writer ->
-//            gson.toJson(jsonData.data, DATA::class.java, writer)
-//        }
-    }
+        json: Json = defaultJson
+    ) = json.encodeToStream(jsonData.data , jsonData.relativeFilePath.outputStream())
+
 
     fun extractResource(file: Path, resource: String, classLoader: ClassLoader) : Path {
         val s = Objects.requireNonNull(classLoader.getResourceAsStream(resource))

@@ -9,10 +9,10 @@ object ReflectionUtils {
             try {
                 Class.forName(canonicalName)
             } catch (e: ClassNotFoundException) {
-                LOGGER.fatal("A FATAL ERROR OCCURRED")
-                LOGGER.fatal("A FATAL ERROR OCCURRED")
-                LOGGER.fatal("A FATAL ERROR OCCURRED")
-                LOGGER.fatal("A FATAL ERROR OCCURRED")
+                LOGGER.error("A FATAL ERROR OCCURRED")
+                LOGGER.error("A FATAL ERROR OCCURRED")
+                LOGGER.error("A FATAL ERROR OCCURRED")
+                LOGGER.error("A FATAL ERROR OCCURRED")
                 throw RuntimeException(e)
             }
         }
