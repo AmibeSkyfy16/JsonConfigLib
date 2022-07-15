@@ -1,7 +1,9 @@
 package ch.skyfy.jsonconfig.example2.config
 
 import ch.skyfy.jsonconfig.Validatable
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Player(
     var homes: MutableList<Home>,
     var uuid: String,

@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    id("org.jetbrains.kotlin.jvm") version "1.7.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10"
     id("java-library")
     `maven-publish`
 }
@@ -14,18 +15,13 @@ repositories {
 }
 
 dependencies {
-//    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.10")
-
-    implementation("org.apache.commons:commons-lang3:3.12.0")
-
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
-//    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
     implementation("org.apache.logging.log4j:log4j-core:2.18.0")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
-//    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.7.10")
 }
 
 tasks {
@@ -47,7 +43,6 @@ tasks {
     }
 
     jar {
-//        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         manifest {
             attributes(
                 mapOf(
@@ -56,8 +51,6 @@ tasks {
                 )
             )
         }
-//        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-//        from(java.sourceSets.main.get().output)
     }
 
     test {

@@ -1,7 +1,9 @@
 package ch.skyfy.jsonconfig.example2.config
 
 import ch.skyfy.jsonconfig.Validatable
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Home(
     var x: Int,
     var y: Int,
