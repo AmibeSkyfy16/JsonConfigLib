@@ -20,7 +20,7 @@ dependencies {
 
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
-    implementation("com.google.code.gson:gson:2.9.0")
+//    implementation("com.google.code.gson:gson:2.9.0")
 
     implementation("org.apache.logging.log4j:log4j-core:2.18.0")
 
