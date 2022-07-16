@@ -9,6 +9,7 @@ class Example3 {
 
     @Test
     fun example3() {
+        if(0 == 0)return // don't run this test
         // First, you have to load the configs. After that we can access them from anywhere in the code
 
         // If this is the first time, then no json files representing the configs exist.

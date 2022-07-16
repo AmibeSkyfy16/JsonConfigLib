@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "ch.skyfy.jsonconfig"
-version = "2.1"
+version = "2.1.1"
 
 repositories {
     mavenCentral()
@@ -21,7 +21,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
-    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16")
+    implementation("org.slf4j:slf4j-api:1.7.36")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
 }
