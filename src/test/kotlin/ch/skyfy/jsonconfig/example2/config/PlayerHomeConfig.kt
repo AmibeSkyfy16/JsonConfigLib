@@ -7,9 +7,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PlayersHomesConfig(var players: MutableList<Player>) : Validatable {
 
-    override fun validate(errors: MutableList<String>) {
-        players.forEach { it.validate(errors) } // validation for player object
-        confirmValidate(errors) // print all errors found and throw a runtime exception if there are errors
+    override fun validateImpl(errors: MutableList<String>) {
+        players.forEach { it.validateImpl(errors) } // validation for player object
     }
 
 }

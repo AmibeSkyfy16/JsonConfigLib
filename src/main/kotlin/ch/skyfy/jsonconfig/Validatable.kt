@@ -12,9 +12,8 @@ interface Validatable {
      *
      * This should not happen at all
      *
-     * @return true if its valid, false otherwise
      */
-    fun validate(errors: MutableList<String>, shouldCrash: Boolean = true) : Boolean {return true}
+    fun validateImpl(errors: MutableList<String>){}
 
     /**
      * must be called at the end.
@@ -22,7 +21,8 @@ interface Validatable {
      *
      * @return true if its valid, false otherwise
      */
-    fun confirmValidate(errors: MutableList<String>, shouldCrash: Boolean = true) : Boolean {
+    fun confirmValidate(errors: MutableList<String>, shouldCrash: Boolean) : Boolean {
+        validateImpl(errors)
         return if (errors.size != 0) {
             LOGGER.error("Some json file are not valid")
             errors.forEach(LOGGER::error)

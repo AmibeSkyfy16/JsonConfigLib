@@ -12,9 +12,8 @@ data class Player(
     var standStill: Int = 5
 ) : Validatable {
 
-    override fun validate(errors: MutableList<String>) {
-
-        homes.forEach { it.validate(errors) }
+    override fun validateImpl(errors: MutableList<String>) {
+        homes.forEach { it.validateImpl(errors) }
 
         // TODO check in mojang database if this uuid is a real and premium minecraft account
 
