@@ -1,0 +1,16 @@
+{
+  /*
+   * The day when players will be able to do damage to themselves. default -> 2
+   */
+  "dayOfAuthorizationOfThePvP": 2,
+
+  /*
+   * The day when players can get into the nether. default -> 4
+   */
+  "dayOfAuthorizationOfTheEntryInTheNether": 4,
+
+  /*
+   * If players can use enderpearl to assault bases or not
+   */
+  "allowEnderPearlAssault": false
+}

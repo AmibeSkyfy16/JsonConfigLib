@@ -19,7 +19,7 @@ import kotlin.reflect.full.createInstance
 
 object JsonManager {
 
-    val defaultJson = Json {
+    var json = Json {
         prettyPrint = true
         isLenient = true
         encodeDefaults = true
@@ -29,7 +29,7 @@ object JsonManager {
 
     inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(
         file: Path,
-        json: Json = defaultJson
+        json: Json = this.json
     ): DATA {
 
         try {
@@ -43,7 +43,7 @@ object JsonManager {
     inline fun <reified DATA : Validatable> getOrCreateConfig(
         file: Path,
         defaultFile: String,
-        json: Json = defaultJson
+        json: Json = this.json
     ): DATA {
         try {
             val d: DATA = if (file.exists()) get(file, json)
@@ -54,13 +54,13 @@ object JsonManager {
     }
 
     @Throws(IOException::class)
-    inline fun <reified DATA : Validatable> get(file: Path, json: Json = defaultJson): DATA = json.decodeFromStream(file.inputStream())
+    inline fun <reified DATA : Validatable> get(file: Path, json: Json = this.json): DATA = json.decodeFromStream(file.inputStream())
 
     @Throws(IOException::class)
     inline fun <reified DATA : Validatable> save(
         config: DATA,
         file: Path,
-        json: Json = defaultJson
+        json: Json = this.json
     ): DATA {
         file.parent.createDirectories()
         json.encodeToStream(config , file.outputStream())
@@ -70,7 +70,7 @@ object JsonManager {
     @Throws(IOException::class)
     inline fun <reified DATA : Validatable> save(
         jsonData: JsonData<DATA>,
-        json: Json = defaultJson
+        json: Json = this.json
     ) = json.encodeToStream(jsonData.data , jsonData.relativeFilePath.outputStream())
 
 

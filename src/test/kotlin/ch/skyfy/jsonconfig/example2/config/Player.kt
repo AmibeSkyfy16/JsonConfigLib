@@ -12,27 +12,15 @@ data class Player(
     var standStill: Int = 5
 ) : Validatable {
 
-    /*
-     * When gson convert a json to kotlin dataclass, some field can be null
-     * even if it is not specified with the question mark
-     */
-    @Suppress("SENSELESS_COMPARISON", "ControlFlowWithEmptyBody")
     override fun validate(errors: MutableList<String>) {
-        println("validate Player ...")
 
-        validateNonNull(errors) // All field of Player cannot be null !
+        homes.forEach { it.validate(errors) }
 
-        if (homes != null) homes.forEach { it.validate(errors) }
+        // TODO check in mojang database if this uuid is a real and premium minecraft account
 
-        if (uuid != null) {
-            // TODO check in mojang database if this uuid is a real and premium minecraft account
-        }
+        if (maxHomes < 0) errors.add("maxHome cannot have a negative value")
 
-        if (maxHomes != null)
-            if (maxHomes < 0) errors.add("maxHome cannot have a negative value")
-
-        if (cooldown != null)
-            if (cooldown < 0) errors.add("cooldown cannot have a negative value")
+        if (cooldown < 0) errors.add("cooldown cannot have a negative value")
 
         if (standStill != 0)
             if (standStill < 0) errors.add("standStill cannot have a negative value")
