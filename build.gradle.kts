@@ -77,6 +77,7 @@ tasks {
 
 
 publishing {
+
     publications {
         create<MavenPublication>("maven") {
             groupId = project.group.toString()
@@ -102,14 +103,13 @@ publishing {
 
     repositories {
         maven {
+            url = uri("https://repo.repsy.io/mvn/amibeskyfy16/repo")
             credentials {
                 val properties = Properties()
-                properties.load(file("C:\\Users\\Skyfy16\\.gradle\\test.properties").inputStream())
+                properties.load(file("C:\\Users\\Skyfy16\\.gradle\\repsy.properties").inputStream())
                 username = "${properties["USERNAME"]}"
                 password = "${properties["PASSWORD"]}"
             }
-
-            url = uri("https://maven.pkg.jetbrains.space/amibeskyfy16/p/jsonconfig/json-config")
         }
     }
 }
