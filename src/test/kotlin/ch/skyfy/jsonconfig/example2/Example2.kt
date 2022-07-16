@@ -1,6 +1,7 @@
 package ch.skyfy.jsonconfig.example2
 
 import ch.skyfy.jsonconfig.JsonConfig
+import ch.skyfy.jsonconfig.JsonData
 import ch.skyfy.jsonconfig.JsonManager
 import ch.skyfy.jsonconfig.example2.config.Configs
 import ch.skyfy.jsonconfig.example2.config.Home
@@ -40,6 +41,13 @@ class Example2 {
 
         // When you modify a config, you have to save it
         JsonManager.save(Configs.PLAYERS_HOMES)
+
+        Thread.sleep(10000)
+        JsonConfig.reloadConfig(Configs.PLAYERS_HOMES)
+
+        println(Configs.PLAYERS_HOMES.data.players)
+
+
     }
 
 }

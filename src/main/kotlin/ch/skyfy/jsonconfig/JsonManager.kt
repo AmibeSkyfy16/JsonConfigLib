@@ -31,7 +31,6 @@ object JsonManager {
         file: Path,
         json: Json = this.json
     ): DATA {
-
         try {
             val d: DATA = if (file.exists()) get(file, json)
             else save(DEFAULT::class.createInstance().getDefault(), file, json)
@@ -46,15 +45,20 @@ object JsonManager {
         json: Json = this.json
     ): DATA {
         try {
-            val d: DATA = if (file.exists()) get(file, json)
-            else get(extractResource(file, defaultFile, DATA::class.java.classLoader), json)
-            d.validate(mutableListOf())
-            return d
+            return if (file.exists()) get(file, json, true)
+            else get(extractResource(file, defaultFile, DATA::class.java.classLoader), json, true)
         } catch (e: java.lang.Exception) { throw RuntimeException(e) }
     }
 
     @Throws(IOException::class)
-    inline fun <reified DATA : Validatable> get(file: Path, json: Json = this.json): DATA = json.decodeFromStream(file.inputStream())
+    inline fun <reified DATA : Validatable> get(file: Path, json: Json = this.json, shouldCrash: Boolean = false): DATA {
+        val d: DATA = json.decodeFromStream(file.inputStream())
+        if(!d.validate(mutableListOf(), shouldCrash)){
+            JsonConfig.LOGGER.warn("You cannot get this data, because something is not valid")
+            throw IOException()
+        }
+        return d
+    }
 
     @Throws(IOException::class)
     inline fun <reified DATA : Validatable> save(
@@ -62,16 +66,28 @@ object JsonManager {
         file: Path,
         json: Json = this.json
     ): DATA {
+        config.validate(mutableListOf())
         file.parent.createDirectories()
         json.encodeToStream(config , file.outputStream())
         return config
     }
 
+    /**
+     * Use by coder to save edited data.
+     * For example, you add a user in a list, you have the called this method to save it to the json file
+     *
+     */
     @Throws(IOException::class)
     inline fun <reified DATA : Validatable> save(
         jsonData: JsonData<DATA>,
         json: Json = this.json
-    ) = json.encodeToStream(jsonData.data , jsonData.relativeFilePath.outputStream())
+    )  {
+        if(!jsonData.data.validate(mutableListOf(), false)){
+            JsonConfig.LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
+            return
+        }
+        json.encodeToStream(jsonData.data , jsonData.relativeFilePath.outputStream())
+    }
 
 
     fun extractResource(file: Path, resource: String, classLoader: ClassLoader) : Path {
