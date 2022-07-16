@@ -6,12 +6,14 @@ object JsonConfig {
     val LOGGER = KotlinLogging.logger {}
     fun loadConfigs(classesToLoad: Array<Class<*>>) = ReflectionUtils.loadClassesByReflection(classesToLoad)
 
-    inline fun <reified DATA : Validatable> reloadConfig(jsonData: JsonData<DATA>) {
+    inline fun <reified DATA : Validatable> reloadConfig(jsonData: JsonData<DATA>) : Boolean {
         try {
             jsonData.data = JsonManager.get(jsonData.relativeFilePath, shouldCrash = false)
         } catch (e: Exception) {
             e.printStackTrace()
             LOGGER.error("The configuration cannot be reloaded due to errors")
+            return false
         }
+        return true
     }
 }
