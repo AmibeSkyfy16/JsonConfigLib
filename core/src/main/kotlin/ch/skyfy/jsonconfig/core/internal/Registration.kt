@@ -38,5 +38,4 @@ class Registration<DATA : Validatable, DEFAULT : Defaultable<DATA>>(
         kf1_save.call(jsonData)
     }
 
-
 }
