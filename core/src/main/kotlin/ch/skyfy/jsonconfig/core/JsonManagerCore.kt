@@ -6,6 +6,7 @@ package ch.skyfy.jsonconfig.core
 
 import ch.skyfy.jsonconfig.core.Utils.get
 import ch.skyfy.jsonconfig.core.Utils.save
+import ch.skyfy.jsonconfig.core.Utils.save1
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.nio.file.Files
 import java.nio.file.Path
@@ -31,7 +32,7 @@ object JsonManagerCore  {
     ): DATA {
         try {
             val d: DATA = if (file.exists())  Utils.get(file, shouldCrash = true)
-            else save(DEFAULT::class.createInstance().getDefault(), file)
+            else save1(DEFAULT::class.createInstance().getDefault(), file)
             d.confirmValidate(mutableListOf(), true)
             return d
         } catch (e: java.lang.Exception) {

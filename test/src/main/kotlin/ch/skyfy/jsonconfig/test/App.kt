@@ -6,7 +6,8 @@ import ch.skyfy.jsonconfig.test.example1.Configs
 import ch.skyfy.jsonconfig.test.example1.Home
 import ch.skyfy.jsonconfig.test.example1.Player
 import ch.skyfy.jsonconfig.test.example1.PlayersHomesConfig
-
+import kotlin.reflect.KFunction3
+import kotlin.reflect.KFunction2
 class App {
     companion object{
         @JvmStatic

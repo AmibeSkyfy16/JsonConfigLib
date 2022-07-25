@@ -3,21 +3,18 @@
 
 package ch.skyfy.jsonconfig.kotlinxserialization
 
-
 import ch.skyfy.jsonconfig.core.JsonConfig
 import ch.skyfy.jsonconfig.core.JsonData
 import ch.skyfy.jsonconfig.core.Validatable
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import java.nio.file.Path
-import kotlin.io.path.createDirectories
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
+import kotlin.reflect.KFunction3
+import kotlin.reflect.KFunction2
 
 @Suppress("unused")
 object JsonManager {
@@ -36,25 +33,30 @@ object JsonManager {
      *
      */
     @Throws(Exception::class)
-    inline fun < reified DATA : Validatable> get(file: Path, shouldCrash: Boolean, clazzData: Class<DATA>): DATA {
+    inline fun <reified DATA : Validatable> get(file: Path, shouldCrash: Boolean): DATA {
         val `data`: DATA = json.decodeFromStream(file.inputStream())
         if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
         return `data`
     }
 
+
     /**
      * Use in getOrCreateConfig fun
      */
     @Throws(Exception::class)
-     fun <DATA : Validatable> save(
+    inline fun <reified DATA : Validatable> save(
         config: DATA,
-        file: Path,
-        clazzData: Class<DATA>
+        file: Path
     ): DATA {
         config.confirmValidate(mutableListOf(), true)
-        file.parent.createDirectories()
         json.encodeToStream(config, file.outputStream())
         return config
+    }
+
+    fun save_KFun2(
+
+    ) : KFunction2<*, Path, Any>{
+        return ::save
     }
 
     /**
@@ -63,7 +65,7 @@ object JsonManager {
      *
      */
     @Throws(Exception::class)
-     fun < DATA : Validatable> save(
+    fun <DATA : Validatable> save(
         jsonData: JsonData<DATA>,
         clazzData: Class<DATA>
     ) {
