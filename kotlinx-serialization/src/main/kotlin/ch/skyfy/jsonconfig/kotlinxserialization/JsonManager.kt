@@ -53,7 +53,7 @@ object JsonManager {
     ): DATA {
         config.confirmValidate(mutableListOf(), true)
         file.parent.createDirectories()
-//        json.encodeToStream(SerializationStrategy,config, file.outputStream())
+        json.encodeToStream(config, file.outputStream())
         return config
     }
 
