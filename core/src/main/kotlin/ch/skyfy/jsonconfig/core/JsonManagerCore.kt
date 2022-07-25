@@ -4,9 +4,7 @@
 package ch.skyfy.jsonconfig.core
 
 
-import ch.skyfy.jsonconfig.core.Utils.get
-import ch.skyfy.jsonconfig.core.Utils.save
-import ch.skyfy.jsonconfig.core.Utils.save1
+import ch.skyfy.jsonconfig.core.internal.Registrators
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.nio.file.Files
 import java.nio.file.Path
@@ -31,8 +29,8 @@ object JsonManagerCore  {
         file: Path
     ): DATA {
         try {
-            val d: DATA = if (file.exists())  Utils.get(file, shouldCrash = true)
-            else save1(DEFAULT::class.createInstance().getDefault(), file)
+            val d: DATA = if (file.exists())  Registrators.registrator.get(file, true)
+            else Registrators.registrator.save(DEFAULT::class.createInstance().getDefault(), file)
             d.confirmValidate(mutableListOf(), true)
             return d
         } catch (e: java.lang.Exception) {
@@ -52,8 +50,9 @@ object JsonManagerCore  {
         defaultFile: String
     ): DATA {
         try {
-            return if (file.exists()) get(file, true)
-            else get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
+            return if (file.exists()) Registrators.registrator.get(file, true)
+//            else get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
+            else Registrators.registrator.get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
         } catch (e: java.lang.Exception) {
             throw RuntimeException(e)
         }

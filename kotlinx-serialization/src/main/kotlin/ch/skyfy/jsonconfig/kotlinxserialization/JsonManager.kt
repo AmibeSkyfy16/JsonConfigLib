@@ -40,6 +40,7 @@ object JsonManager {
     }
 
 
+
     /**
      * Use in getOrCreateConfig fun
      */
@@ -53,11 +54,6 @@ object JsonManager {
         return config
     }
 
-    fun save_KFun2(
-
-    ) : KFunction2<*, Path, Any>{
-        return ::save
-    }
 
     /**
      * Use by coder to save edited data.
@@ -65,15 +61,15 @@ object JsonManager {
      *
      */
     @Throws(Exception::class)
-    fun <DATA : Validatable> save(
-        jsonData: JsonData<DATA>,
-        clazzData: Class<DATA>
+    inline fun <reified DATA : Validatable> save(
+        jsonData: JsonData<DATA>
+
     ) {
         if (!jsonData.data.confirmValidate(mutableListOf(), false)) {
             JsonConfig.LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
             return
         }
-        json.encodeToStream(clazzData, jsonData.relativeFilePath.outputStream())
+        json.encodeToStream(jsonData.data, jsonData.relativeFilePath.outputStream())
     }
 
 }

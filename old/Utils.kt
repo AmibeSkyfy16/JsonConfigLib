@@ -86,13 +86,13 @@ object Utils {
     inline fun <reified DATA : Validatable> callFunction(classPath: String, config: DATA, file: Path): DATA {
         val clazz = Class.forName("$classPath.JsonManager")
         val instance = clazz.kotlin.objectInstance ?: clazz.kotlin.createInstance()
-//        val saveFun = clazz.kotlin.functions.find { (it.name == "save") }
-        val saveFun = clazz.kotlin.functions.find { (it.name == "save_KFun2") }
+        val saveFun = clazz.kotlin.functions.find { (it.name == "save") }
+//        val saveFun = clazz.kotlin.functions.find { (it.name == "save_KFun2") }
         if (saveFun != null) {
             println("calling save fun")
-//            return saveFun.call(instance, config, file) as DATA
-            val l = saveFun.call(instance) as KFunction2<*, *, *>
-            l.call(config, file)
+            return saveFun.call(instance, config, file) as DATA
+//            val l = saveFun.call(instance) as KFunction2<*, *, *>
+//            l.call(config, file)
 
         }
         throw IOException("temporary exception")
