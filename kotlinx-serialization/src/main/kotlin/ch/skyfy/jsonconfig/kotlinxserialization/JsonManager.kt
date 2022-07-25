@@ -8,6 +8,9 @@ import ch.skyfy.jsonconfig.core.JsonConfig
 import ch.skyfy.jsonconfig.core.JsonData
 import ch.skyfy.jsonconfig.core.Validatable
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
@@ -33,7 +36,7 @@ object JsonManager {
      *
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> get(file: Path, shouldCrash: Boolean): DATA {
+    inline fun < reified DATA : Validatable> get(file: Path, shouldCrash: Boolean, clazzData: Class<DATA>): DATA {
         val `data`: DATA = json.decodeFromStream(file.inputStream())
         if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
         return `data`
@@ -43,13 +46,14 @@ object JsonManager {
      * Use in getOrCreateConfig fun
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
+     fun <DATA : Validatable> save(
         config: DATA,
-        file: Path
+        file: Path,
+        clazzData: Class<DATA>
     ): DATA {
         config.confirmValidate(mutableListOf(), true)
         file.parent.createDirectories()
-        json.encodeToStream(config, file.outputStream())
+//        json.encodeToStream(SerializationStrategy,config, file.outputStream())
         return config
     }
 
@@ -59,14 +63,15 @@ object JsonManager {
      *
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
-        jsonData: JsonData<DATA>
+     fun < DATA : Validatable> save(
+        jsonData: JsonData<DATA>,
+        clazzData: Class<DATA>
     ) {
         if (!jsonData.data.confirmValidate(mutableListOf(), false)) {
             JsonConfig.LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
             return
         }
-        json.encodeToStream(jsonData.data, jsonData.relativeFilePath.outputStream())
+        json.encodeToStream(clazzData, jsonData.relativeFilePath.outputStream())
     }
 
 }

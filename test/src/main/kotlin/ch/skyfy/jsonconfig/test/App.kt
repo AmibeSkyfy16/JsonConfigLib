@@ -1,18 +1,24 @@
-package example2
+package ch.skyfy.jsonconfig.test
 
 import ch.skyfy.jsonconfig.core.JsonConfig
 import ch.skyfy.jsonconfig.kotlinxserialization.JsonManager
-import example2.config.Configs
-import example2.config.Home
-import example2.config.Player
-import example2.config.PlayersHomesConfig
-import kotlin.test.Test
+import ch.skyfy.jsonconfig.test.example1.Configs
+import ch.skyfy.jsonconfig.test.example1.Home
+import ch.skyfy.jsonconfig.test.example1.Player
+import ch.skyfy.jsonconfig.test.example1.PlayersHomesConfig
 
-class Example2 {
-
-    @Test
-    fun example2() {
+class App {
+    companion object{
+        @JvmStatic
+        fun main(args: Array<String>) {
+            println("PEEWEE")
+            App().example1()
+        }
+    }
+    fun example1(){
         JsonManager
+
+
         // First, you have to load the configs. After that we can access them from anywhere in the code
 
         // If this is the first time, then no json files representing the configs exist.
@@ -46,7 +52,5 @@ class Example2 {
         JsonConfig.reloadConfig(Configs.PLAYERS_HOMES)
 
         println(Configs.PLAYERS_HOMES.data.players)
-
     }
-
 }

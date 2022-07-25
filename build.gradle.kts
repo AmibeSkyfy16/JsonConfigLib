@@ -135,14 +135,17 @@ subprojects {
 
 }
 
-configure(subprojects.filter { listOf("kotlinx-serialization").contains(it.name) }) {
+configure(subprojects.filter { listOf("kotlinx-serialization", "test", "core").contains(it.name) }) {
 
     repositories {
         dependencies{
 
-
-
             if (project.name == "kotlinx-serialization") {
+                implementation(project(":core"))
+            }
+
+            if(project.name == "test"){
+                implementation(project(":kotlinx-serialization"))
                 implementation(project(":core"))
             }
         }
