@@ -25,6 +25,16 @@ object JsonManager {
         allowSpecialFloatingPointValues = true
     }
 
+    class Get{
+        companion object{
+            inline operator fun <reified DATA : Validatable> invoke(file: Path, shouldCrash: Boolean) : DATA{
+                val `data`: DATA = json.decodeFromStream(file.inputStream())
+                if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
+                return `data`
+            }
+        }
+    }
+
     /**
      * Try to convert a json data stored in a file to an object
      *
@@ -45,7 +55,6 @@ object JsonManager {
         json.encodeToStream(config, file.outputStream())
         return config
     }
-
 
     /**
      * Use by coder to save edited data.

@@ -9,6 +9,7 @@ object Loader {
     init {
         println("LOADING")
         Registrators.registration = Registration.invoke(
+            JsonManager.Get,
             JsonManager::get,
             JsonManager::save,
             JsonManager::save

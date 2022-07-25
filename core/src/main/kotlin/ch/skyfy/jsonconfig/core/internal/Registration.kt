@@ -6,8 +6,10 @@ import ch.skyfy.jsonconfig.core.Validatable
 import java.nio.file.Path
 import kotlin.reflect.KFunction1
 import kotlin.reflect.KFunction2
+import kotlin.reflect.full.functions
 
 class Registration<DATA : Validatable, DEFAULT : Defaultable<DATA>>(
+    val invoked1: Companion,
     val kf2_get: KFunction2<Path, Boolean, DATA>,
     val kf2_save: KFunction2<DATA, Path, DATA>,
     val kf1_save: KFunction1<JsonData<DATA>, Unit>
@@ -15,15 +17,18 @@ class Registration<DATA : Validatable, DEFAULT : Defaultable<DATA>>(
 
     companion object{
         inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(
+             invoked1: Any,
             kf2_get: KFunction2<Path, Boolean, DATA>,
             kf2_save: KFunction2<DATA, Path, DATA>,
-             kf1_save: KFunction1<JsonData<DATA>, Unit>
+            kf1_save: KFunction1<JsonData<DATA>, Unit>
         ) : Registration<DATA, DEFAULT>{
-            return Registration(kf2_get, kf2_save, kf1_save)
+
+            return Registration(invoked1, kf2_get, kf2_save, kf1_save)
         }
     }
 
     inline fun <reified DATA : Validatable> get(file: Path, shouldCrash: Boolean): DATA {
+
         return kf2_get.call(file, shouldCrash) as DATA
     }
 
