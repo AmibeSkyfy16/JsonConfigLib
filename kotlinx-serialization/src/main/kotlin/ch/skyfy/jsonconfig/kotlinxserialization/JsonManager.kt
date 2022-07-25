@@ -13,8 +13,6 @@ import kotlinx.serialization.json.encodeToStream
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
-import kotlin.reflect.KFunction3
-import kotlin.reflect.KFunction2
 
 @Suppress("unused")
 object JsonManager {
@@ -27,7 +25,6 @@ object JsonManager {
         allowSpecialFloatingPointValues = true
     }
 
-
     /**
      * Try to convert a json data stored in a file to an object
      *
@@ -39,16 +36,11 @@ object JsonManager {
         return `data`
     }
 
-
-
     /**
      * Use in getOrCreateConfig fun
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
-        config: DATA,
-        file: Path
-    ): DATA {
+    inline fun <reified DATA : Validatable> save(config: DATA, file: Path): DATA {
         config.confirmValidate(mutableListOf(), true)
         json.encodeToStream(config, file.outputStream())
         return config
@@ -61,10 +53,7 @@ object JsonManager {
      *
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
-        jsonData: JsonData<DATA>
-
-    ) {
+    inline fun <reified DATA : Validatable> save(jsonData: JsonData<DATA>) {
         if (!jsonData.data.confirmValidate(mutableListOf(), false)) {
             JsonConfig.LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
             return

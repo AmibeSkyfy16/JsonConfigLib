@@ -29,8 +29,8 @@ object JsonManagerCore  {
         file: Path
     ): DATA {
         try {
-            val d: DATA = if (file.exists())  Registrators.registrator.get(file, true)
-            else Registrators.registrator.save(DEFAULT::class.createInstance().getDefault(), file)
+            val d: DATA = if (file.exists())  Registrators.registration.get(file, true)
+            else Registrators.registration.save(DEFAULT::class.createInstance().getDefault(), file)
             d.confirmValidate(mutableListOf(), true)
             return d
         } catch (e: java.lang.Exception) {
@@ -50,9 +50,9 @@ object JsonManagerCore  {
         defaultFile: String
     ): DATA {
         try {
-            return if (file.exists()) Registrators.registrator.get(file, true)
+            return if (file.exists()) Registrators.registration.get(file, true)
 //            else get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
-            else Registrators.registrator.get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
+            else Registrators.registration.get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
         } catch (e: java.lang.Exception) {
             throw RuntimeException(e)
         }
