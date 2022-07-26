@@ -16,7 +16,7 @@ object JsonConfig {
             // Implementation for kotlinx.serialization
             if (item.name == "ch.skyfy.jsonconfig.kotlinxserialization") {
                 val clazz = Class.forName("ch.skyfy.jsonconfig.kotlinxserialization.Loader")
-//                val inst = clazz.kotlin.companionObject.
+//
 
 
             }
