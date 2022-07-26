@@ -1,9 +1,6 @@
 package ch.skyfy.jsonconfig.core
 
 import mu.KotlinLogging
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.createInstance
 
 object JsonConfig {
     val LOGGER = KotlinLogging.logger {}
@@ -15,10 +12,7 @@ object JsonConfig {
 
             // Implementation for kotlinx.serialization
             if (item.name == "ch.skyfy.jsonconfig.kotlinxserialization") {
-                val clazz = Class.forName("ch.skyfy.jsonconfig.kotlinxserialization.Loader")
-//
-
-
+                Class.forName("ch.skyfy.jsonconfig.kotlinxserialization.Loader")
             }
 
             // Implementation for Google Gson
@@ -37,7 +31,6 @@ object JsonConfig {
     }
 
     inline fun <reified DATA : Validatable> reloadConfig(jsonData: JsonData<DATA>) : Boolean {
-
 //        try {
 //            jsonData.data = JsonManager.get(jsonData.relativeFilePath, shouldCrash = false)
 //        } catch (e: Exception) {

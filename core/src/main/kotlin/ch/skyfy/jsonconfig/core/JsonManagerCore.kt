@@ -22,7 +22,6 @@ object JsonManagerCore {
      */
     inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(file: Path): DATA {
         try {
-//            val d: DATA = if (file.exists()) Registrators.registration.get(file, true)
             val d: DATA = if (file.exists()) Registrators.get.get(file, true)
             else Registrators.save.save(DEFAULT::class.createInstance().getDefault(), file)
             d.confirmValidate(mutableListOf(), true)

@@ -7,9 +7,13 @@ import ch.skyfy.jsonconfig.core.JsonConfig
 import ch.skyfy.jsonconfig.core.JsonData
 import ch.skyfy.jsonconfig.core.Validatable
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Polymorphic
+import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
+import kotlinx.serialization.modules.PolymorphicModuleBuilder
+import kotlinx.serialization.modules.SerializersModule
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
@@ -36,7 +40,7 @@ object JsonManager {
         }
     }
 
-    class Save<DATA : Validatable> {
+    class Save{
         companion object{
             inline operator fun <reified DATA : Validatable> invoke(config: DATA, file: Path) : DATA{
                 config.confirmValidate(mutableListOf(), true)

@@ -1,6 +1,7 @@
 package ch.skyfy.jsonconfig.test.example1
 
 import ch.skyfy.jsonconfig.core.Validatable
+import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
 
 @Serializable

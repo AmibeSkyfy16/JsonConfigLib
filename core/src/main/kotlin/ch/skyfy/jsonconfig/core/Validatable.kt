@@ -3,6 +3,7 @@
 package ch.skyfy.jsonconfig.core
 
 import ch.skyfy.jsonconfig.core.JsonConfig.LOGGER
+import kotlinx.serialization.Polymorphic
 
 interface Validatable {
 
