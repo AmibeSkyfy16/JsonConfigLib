@@ -12,7 +12,7 @@ object JsonConfig {
 
             // Implementation for kotlinx.serialization
             if (item.name == "ch.skyfy.jsonconfig.kotlinxserialization") {
-                Class.forName("ch.skyfy.jsonconfig.kotlinxserialization.Loader")
+                Class.forName("ch.skyfy.jsonconfig.kotlinxserialization.Loader") // Load
             }
 
             // Implementation for Google Gson
