@@ -25,12 +25,23 @@ object JsonManager {
         allowSpecialFloatingPointValues = true
     }
 
-    class Get{
+
+    class Get {
         companion object{
             inline operator fun <reified DATA : Validatable> invoke(file: Path, shouldCrash: Boolean) : DATA{
                 val `data`: DATA = json.decodeFromStream(file.inputStream())
                 if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
                 return `data`
+            }
+        }
+    }
+
+    class Save<DATA : Validatable> {
+        companion object{
+            inline operator fun <reified DATA : Validatable> invoke(config: DATA, file: Path) : DATA{
+                config.confirmValidate(mutableListOf(), true)
+                json.encodeToStream(config, file.outputStream())
+                return config
             }
         }
     }
@@ -44,14 +55,6 @@ object JsonManager {
         val `data`: DATA = json.decodeFromStream(file.inputStream())
         if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
         return `data`
-    }
-
-    inline fun <reified DATA : Validatable> get2(file: Path, shouldCrash: Boolean): () -> DATA {
-        return {
-            val `data`: DATA = json.decodeFromStream(file.inputStream())
-            if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
-            data
-        }
     }
 
     /**

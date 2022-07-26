@@ -5,19 +5,16 @@ import ch.skyfy.jsonconfig.core.internal.Registration
 import ch.skyfy.jsonconfig.core.internal.Registrators
 
 @Suppress("unused")
-class Loader {
-
-
+object Loader {
 
     init {
         println("LOADING")
-        Registrators.registration = Registration.invoke(
-//            JsonManager::get2,
-//            JsonManager.Get,
-            JsonManager::get,
-//            JsonManager::save,
-//            JsonManager::save
-        )
+        Registrators.get = Registration.Get(block = { l, p->
+            return@Get JsonManager.Get.invoke(l, p)
+        })
+        Registrators.save = Registration.Save { l, p ->
+            return@Save JsonManager.Save.invoke(l as Validatable, p)
+        }
     }
 
 }

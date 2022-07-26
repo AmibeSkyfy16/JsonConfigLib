@@ -22,8 +22,9 @@ object JsonManagerCore {
      */
     inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(file: Path): DATA {
         try {
-            val d: DATA = if (file.exists()) Registrators.registration.get(file, true)
-            else Registrators.registration.save(DEFAULT::class.createInstance().getDefault(), file)
+//            val d: DATA = if (file.exists()) Registrators.registration.get(file, true)
+            val d: DATA = if (file.exists()) Registrators.get.get(file, true)
+            else Registrators.save.save(DEFAULT::class.createInstance().getDefault(), file)
             d.confirmValidate(mutableListOf(), true)
             return d
         } catch (e: java.lang.Exception) {
@@ -40,8 +41,8 @@ object JsonManagerCore {
      */
     inline fun <reified DATA : Validatable> getOrCreateConfig(file: Path, defaultFile: String): DATA {
         try {
-            return if (file.exists()) Registrators.registration.get(file, true)
-            else Registrators.registration.get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
+            return if (file.exists())  Registrators.get.get(file, true)
+            else Registrators.get.get(extractResource(file, defaultFile, DATA::class.java.classLoader), true)
         } catch (e: java.lang.Exception) {
             throw RuntimeException(e)
         }
