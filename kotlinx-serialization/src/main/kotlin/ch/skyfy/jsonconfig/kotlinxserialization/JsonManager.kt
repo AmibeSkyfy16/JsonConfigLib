@@ -46,6 +46,14 @@ object JsonManager {
         return `data`
     }
 
+    inline fun <reified DATA : Validatable> get2(file: Path, shouldCrash: Boolean): () -> DATA {
+        return {
+            val `data`: DATA = json.decodeFromStream(file.inputStream())
+            if (!`data`.confirmValidate(mutableListOf(), shouldCrash)) throw Exception("The json file is not valid !!!")
+            data
+        }
+    }
+
     /**
      * Use in getOrCreateConfig fun
      */
