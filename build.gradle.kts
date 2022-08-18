@@ -27,7 +27,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
     implementation("org.slf4j:slf4j-api:1.7.36")
 
-    testImplementation("ch.qos.logback:logback-classic:1.3.0-alpha16")
+    testImplementation("ch.qos.logback:logback-classic:1.3.0-beta0")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
 }
 
