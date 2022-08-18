@@ -1,6 +1,6 @@
-package ch.skyfy.jsonconfig
+package ch.skyfy.jsonconfiglib
 
-import ch.skyfy.jsonconfig.JsonConfig.LOGGER
+import ch.skyfy.jsonconfiglib.ConfigManager.LOGGER
 import kotlin.test.Test
 
 class LoggerTest {

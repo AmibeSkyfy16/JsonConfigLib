@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.archivesName
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
@@ -9,8 +10,11 @@ plugins {
     idea
 }
 
-group = "ch.skyfy.jsonconfig"
-version = "2.1.4"
+base {
+    archivesName.set(properties["archives_name"].toString())
+    group = property("maven_group")!!
+    version = property("version")!!
+}
 
 repositories {
     mavenCentral()
@@ -82,13 +86,13 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = project.group.toString()
-            artifactId = "json-config"
+            artifactId = archivesName
             version = project.version.toString()
 
             from(components["java"])
 
             pom {
-                name.set("json-config")
+                name.set(archivesName)
                 description.set("a tiny json config library used for minecraft mod dev")
 
                 licenses {

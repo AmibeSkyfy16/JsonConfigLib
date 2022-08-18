@@ -1,7 +1,7 @@
-package ch.skyfy.jsonconfig.example3.config
+package ch.skyfy.jsonconfiglib.example3.config
 
-import ch.skyfy.jsonconfig.Defaultable
-import ch.skyfy.jsonconfig.Validatable
+import ch.skyfy.jsonconfiglib.Defaultable
+import ch.skyfy.jsonconfiglib.Validatable
 
 @kotlinx.serialization.Serializable
 data class Config(
@@ -11,6 +11,6 @@ data class Config(
 ) : Validatable
 
 @Suppress("unused")
-class DefaultConfig : Defaultable<Config>{
+class DefaultConfig : Defaultable<Config> {
     override fun getDefault() = Config(2, 4, false)
 }

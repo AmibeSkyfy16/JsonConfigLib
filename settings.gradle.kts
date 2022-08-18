@@ -1,3 +1,3 @@
 
-rootProject.name = "JsonConfig"
+rootProject.name = "JsonConfigLib"
 

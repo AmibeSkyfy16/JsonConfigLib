@@ -1,7 +1,5 @@
 ### Json Config
 
-#### since version 2.0 I switch to kotlinx to work with json instead of Google Gson
-
 #### A tiny library which allows to manage configuration files in json.
 
 #### Used especially in minecraft mod dev
@@ -20,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation("ch.skyfy.jsonconfig:json-config:2.1")!!
+    implementation("ch.skyfy.jsonconfiglib:json-config-lib:3.0.0")!!
 }
 ```
 
