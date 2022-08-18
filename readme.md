@@ -22,5 +22,5 @@ dependencies {
 }
 ```
 
-#### If you want to include this no-mod library in your final jar file, take a look at this: https://github.com/AmibeSkyfy16/MariaDBServerFabricMC/blob/2.0/build.gradle.kts
+#### If you want to include this no-mod library in your final jar fi1le, take a look at this: https://github.com/AmibeSkyfy16/MariaDBServerFabricMC/blob/2.0/build.gradle.kts
 
