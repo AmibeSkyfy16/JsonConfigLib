@@ -114,7 +114,7 @@ object ConfigManager {
     @Throws(Exception::class)
     inline fun <reified DATA : Validatable> get(file: Path, json: Json = ConfigManager.json, shouldThrowRuntimeException: Boolean): DATA {
         val `data`: DATA = json.decodeFromStream(file.inputStream())
-        if (!`data`.confirmValidate(shouldThrowRuntimeException =  shouldThrowRuntimeException)) throw Exception("The json file is not valid !!!")
+        if (!`data`.confirmValidate(shouldThrowRuntimeException = shouldThrowRuntimeException)) throw Exception("The json file is not valid !!!")
         return `data`
     }
 
@@ -159,6 +159,15 @@ object ConfigManager {
             return
         }
         json.encodeToStream(configData.`data`, configData.relativeFilePath.outputStream())
+    }
+
+    inline fun <reified DATA : Validatable> computeAndSave(
+        configData: ConfigData<DATA>,
+        block: (DATA) -> Unit,
+        json: Json = ConfigManager.json,
+    ) {
+        block.invoke(configData.`data`)
+        save(configData, json)
     }
 
     /**
