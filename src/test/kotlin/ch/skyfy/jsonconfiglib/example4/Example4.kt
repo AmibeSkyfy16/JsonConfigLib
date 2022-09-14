@@ -1,13 +1,15 @@
 package ch.skyfy.jsonconfiglib.example4
 
-import ch.skyfy.jsonconfiglib.*
+import ch.skyfy.jsonconfiglib.ConfigManager
+import ch.skyfy.jsonconfiglib.addGlobalNotifier
 import ch.skyfy.jsonconfiglib.example4.config.Configs
 import ch.skyfy.jsonconfiglib.example4.config.Database
+import ch.skyfy.jsonconfiglib.setValue
+import kotlin.reflect.jvm.jvmName
 import kotlin.test.Test
 
 class Example4 {
 
-    @Suppress("UNUSED_ANONYMOUS_PARAMETER")
     @Test
     fun example4() {
 
@@ -17,9 +19,10 @@ class Example4 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // add a global notifier. This means that every time a value is modified, the code will be called
-        Configs.CONFIG.addGlobalNotifier { kProperty, oldValue, newValue, data ->
-            println("Hey, a member property of ${data.port} has been set")
-            println("Updating sideboard with newValue ...")
+        ch.skyfy.jsonconfiglib.example3.config.Configs.CONFIG.addGlobalNotifier { kProperty, oldValue, newValue, data ->
+            println("Hey, member property: ${kProperty.name} for ${data::class.jvmName} has been modified from $oldValue to $newValue")
+            println("Updating sideboard...")
+            println("Updating game...")
         }
 
         // Now we can access the config
@@ -34,7 +37,7 @@ class Example4 {
 
         // See below how to set a value
         // If you set the value of automaticallySave to true in Configs, the file json will be updated
-        configData.setValue(Database::port, database.port + 10)
+        configData.setValue(database::port, database.port + 10)
 
         // Things you should never do
         //      - Set a value like below !!!
@@ -45,9 +48,5 @@ class Example4 {
         println("port : ${database.port}")
         println("url : ${database.url}")
     }
-
-}
-
-private fun Int.setValue(i: Int) {
 
 }

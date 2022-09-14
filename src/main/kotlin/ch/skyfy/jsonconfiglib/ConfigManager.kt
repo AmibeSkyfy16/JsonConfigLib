@@ -163,8 +163,7 @@ object ConfigManager {
 
     inline fun <reified DATA : Validatable> computeAndSave(
         configData: ConfigData<DATA>,
-        block: (DATA) -> Unit,
-        json: Json = ConfigManager.json,
+        block: (DATA) -> Unit
     ) {
         block.invoke(configData.`data`)
         save(configData, json)

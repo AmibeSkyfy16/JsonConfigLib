@@ -3,6 +3,7 @@ package ch.skyfy.jsonconfiglib
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.Delegates
+import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
@@ -11,9 +12,9 @@ import kotlin.reflect.full.memberProperties
 /**
  * Set the value for the chosen member property by accessing her delegate
  */
-inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.setValue(kProperty1: KMutableProperty1<DATA, TYPE>, value: TYPE) {
+inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.setValue(kProperty0: KMutableProperty0<TYPE>, value: TYPE) {
     delegates.forEach { entry ->
-        if (entry.key == kProperty1){
+        if (entry.key.name == kProperty0.name){
             val anonymous = entry.value.invoke().get()
             val delegated = anonymous::class.memberProperties.first() as KMutableProperty1
             delegated.setter.call(anonymous, value)
