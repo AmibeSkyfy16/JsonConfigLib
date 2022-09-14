@@ -1,6 +1,7 @@
 package ch.skyfy.jsonconfiglib.example4
 
 import ch.skyfy.jsonconfiglib.ConfigManager
+import ch.skyfy.jsonconfiglib.change
 import ch.skyfy.jsonconfiglib.example4.config.Configs
 import kotlin.test.Test
 
@@ -23,6 +24,13 @@ class Example4 {
         println("url : ${config.url}")
 
         ConfigManager.computeAndSave(Configs.CONFIG, {data -> data.port = 3307})
+
+        Configs.CONFIG.onChangesCallback.add {
+            println("on changed")
+        }
+        Configs.CONFIG.change {
+            it.port = 3307
+        }
 
         config = Configs.CONFIG.data
 
