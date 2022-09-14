@@ -40,9 +40,9 @@ object ConfigManager {
      * @param configData A [ConfigData] object that represent a configuration
      * @return A [Boolean] that will be true if the configuration has been successfully reloaded
      */
-    inline fun <reified DATA : Validatable> reloadConfig(configData: ConfigData<DATA>): Boolean {
+    inline fun <reified DATA : Validatable, reified DELEGATE : DelegateData<DATA>> reloadConfig(configData: ConfigData<DATA, DELEGATE>): Boolean {
         try {
-            configData.`data` = get(configData.relativeFilePath, shouldThrowRuntimeException = false)
+            configData.delegateData.data = get(configData.relativeFilePath, shouldThrowRuntimeException = false)
         } catch (e: Exception) {
             e.printStackTrace()
             LOGGER.error("The configuration cannot be reloaded due to errors")
@@ -63,15 +63,17 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      * @return An object of type [DATA] that represent the configuration
      */
-    inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(
+    inline fun <reified DATA : Validatable, reified DELEGATE : DelegateData<DATA>, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(
         file: Path,
         json: Json = ConfigManager.json,
-    ): DATA {
+    ): DELEGATE {
+
         try {
             val d: DATA = if (file.exists()) get(file, json, true)
             else save(DEFAULT::class.createInstance().getDefault(), file, json)
             d.confirmValidate(shouldThrowRuntimeException = true)
-            return d
+            val delegate = DELEGATE::class.constructors.first().call(d)
+            return delegate
         } catch (e: java.lang.Exception) {
             throw RuntimeException(e)
         }
@@ -90,14 +92,16 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      * @return An object of type [DATA] that represent the configuration
      */
-    inline fun <reified DATA : Validatable> getOrCreateConfig(
+    inline fun <reified DATA : Validatable, reified DELEGATE : DelegateData<DATA>> getOrCreateConfig(
         file: Path,
         defaultFile: String,
         json: Json = ConfigManager.json,
-    ): DATA {
+    ): DELEGATE {
         try {
-            return if (file.exists()) get(file, json, true)
+            val data:DATA = if (file.exists()) get(file, json, true)
             else get(extractResource(file, defaultFile, DATA::class.java.classLoader), json, true)
+            val delegate = DELEGATE::class.constructors.first().call(data)
+            return delegate
         } catch (e: java.lang.Exception) {
             throw RuntimeException(e)
         }
@@ -150,25 +154,25 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
-        configData: ConfigData<DATA>,
+    inline fun <reified DATA : Validatable, reified DELEGATE : DelegateData<DATA>> save(
+        configData: ConfigData<DATA, DELEGATE>,
         json: Json = ConfigManager.json,
     ) {
-        if (!configData.`data`.confirmValidate(mutableListOf(), false)) {
+        if (!configData.delegateData.data.confirmValidate(mutableListOf(), false)) {
             LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
             return
         }
-        json.encodeToStream(configData.`data`, configData.relativeFilePath.outputStream())
+        json.encodeToStream(configData.delegateData.data, configData.relativeFilePath.outputStream())
     }
 
-    inline fun <reified DATA : Validatable> computeAndSave(
-        configData: ConfigData<DATA>,
-        block: (DATA) -> Unit,
-        json: Json = ConfigManager.json,
-    ) {
-        block.invoke(configData.`data`)
-        save(configData, json)
-    }
+//    inline fun <reified DATA : Validatable> computeAndSave(
+//        configData: ConfigData<DATA>,
+//        block: (DATA) -> Unit,
+//        json: Json = ConfigManager.json,
+//    ) {
+//        block.invoke(configData.`data`)
+//        save(configData, json)
+//    }
 
     /**
      * A simple fun that will be used to extract a file from inside a jar to somewhere outside the jar

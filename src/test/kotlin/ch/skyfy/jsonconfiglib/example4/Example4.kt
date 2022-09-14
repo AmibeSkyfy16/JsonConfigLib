@@ -17,14 +17,16 @@ class Example4 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // Now we can access the config
-        var config = Configs.CONFIG.data
+        var config = Configs.CONFIG.delegateData.data
 
         println("port : ${config.port}")
         println("url : ${config.url}")
 
-        ConfigManager.computeAndSave(Configs.CONFIG, {data -> data.port = 3307})
+//        ConfigManager.computeAndSave(Configs.CONFIG, {data -> data.port = 3307})
 
-        config = Configs.CONFIG.data
+        Configs.CONFIG.delegateData.port = 100
+
+        config = Configs.CONFIG.delegateData.data
 
         println("port : ${config.port}")
         println("url : ${config.url}")

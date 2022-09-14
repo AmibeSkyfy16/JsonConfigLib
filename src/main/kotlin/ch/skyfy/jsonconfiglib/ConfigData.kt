@@ -10,13 +10,15 @@ import java.nio.file.Path
  * @property data An object of type [DATA] representing the configuration
  * @property relativeFilePath A [Path] object representing where the configuration file is located
  */
-data class ConfigData<DATA : Validatable>(var data: DATA, val relativeFilePath: Path) {
+data class ConfigData<DATA : Validatable, DELEGATE>(var delegateData: DELEGATE, val relativeFilePath: Path) {
     companion object {
-        inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativeFilePath: Path): ConfigData<DATA> =
-            ConfigData(ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath), relativeFilePath)
+        inline operator fun <reified DATA : Validatable, reified DELEGATE : DelegateData<DATA>, reified DEFAULT : Defaultable<DATA>> invoke(relativeFilePath: Path): ConfigData<DATA, DELEGATE> {
+//            val l = ConfigManager.getOrCreateConfig<DATA,DELEGATE, DEFAULT>(relativeFilePath)
+            return ConfigData(ConfigManager.getOrCreateConfig<DATA, DELEGATE, DEFAULT>(relativeFilePath), relativeFilePath)
+        }
 
-        inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String): ConfigData<DATA> =
-            ConfigData(ConfigManager.getOrCreateConfig(relativeFilePath, defaultFile), relativeFilePath)
+//        inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String): ConfigData<DATA> =
+//            ConfigData(ConfigManager.getOrCreateConfig(relativeFilePath, defaultFile), relativeFilePath)
     }
 
 }
