@@ -1,5 +1,7 @@
 ### Json Config
 
+### This version (4.0) is experimental. I recommend using 3.0
+
 #### A tiny library which allows to manage configuration files in json.
 
 #### Used especially in minecraft mod dev

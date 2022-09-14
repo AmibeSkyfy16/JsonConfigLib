@@ -4,5 +4,5 @@ import ch.skyfy.jsonconfiglib.ConfigData
 import java.nio.file.Paths
 
 object Configs {
-    val CONFIG = ConfigData.invoke<Config, DefaultConfig>(Paths.get("C:\\temp\\games.json"))
+    val CONFIG = ConfigData.invoke<Config, DefaultConfig>(Paths.get("C:\\temp\\games.json"), true)
 }
