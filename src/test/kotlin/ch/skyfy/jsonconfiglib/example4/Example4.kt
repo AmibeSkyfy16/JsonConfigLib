@@ -7,6 +7,7 @@ import kotlin.test.Test
 
 class Example4 {
 
+    @Suppress("UNUSED_ANONYMOUS_PARAMETER")
     @Test
     fun example4() {
 
@@ -16,7 +17,7 @@ class Example4 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // add a global notifier. This means that every time a value is modified, the code will be called
-        Configs.CONFIG.addGlobalNotifier { _, _, _,data->
+        Configs.CONFIG.addGlobalNotifier { kProperty, oldValue, newValue, data ->
             println("Hey, a member property of ${data.port} has been set")
             println("Updating sideboard with newValue ...")
         }
@@ -34,6 +35,12 @@ class Example4 {
         // See below how to set a value
         // If you set the value of automaticallySave to true in Configs, the file json will be updated
         configData.setValue(Database::port, database.port + 10)
+
+        // Things you should never do
+        //      - Set a value like below !!!
+        //        Always use delegate to set a value, otherwise, it will not automatically save in json file and all the global notifier that
+        //        you register will not be invoked
+        database.port = 6
 
         println("port : ${database.port}")
         println("url : ${database.url}")

@@ -51,12 +51,7 @@ data class ConfigData<DATA : Validatable>(
             inline operator fun <reified DATA : Validatable> invoke(
                 delegates: MutableMap<KProperty1<*, *>, () -> AtomicReference<Any>>,
                 onChangeCallbacks: MutableMap<KProperty1<*, *>, MutableList<(KProperty<*>, Any?, Any?, DATA) -> Unit>>
-            ): InitializeObject<DATA> {
-                return InitializeObject(delegates, onChangeCallbacks)
-//                val `data` = ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath)
-//                val initializeObject = initialize(`data`, relativeFilePath, automaticallySave)
-//                return ConfigData(`data`, relativeFilePath, initializeObject.delegates, initializeObject.onChangeCallbacks)
-            }
+            ) = InitializeObject(delegates, onChangeCallbacks)
         }
     }
 
@@ -97,7 +92,6 @@ data class ConfigData<DATA : Validatable>(
                 onChangeCallbacks[kProperty1] = mutableListOf
             }
             return InitializeObject.invoke(delegates, onChangeCallbacks)
-//            return InitializeObject(delegates, onChangeCallbacks)
         }
     }
 
