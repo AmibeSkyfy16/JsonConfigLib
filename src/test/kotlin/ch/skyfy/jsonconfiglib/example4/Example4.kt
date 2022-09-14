@@ -31,7 +31,7 @@ class Example4 {
 //        ConfigManager.computeAndSave(Configs.CONFIG, { data -> data.port = 3307 })
 //        Thread.sleep(5000)
         val l = Configs.CONFIG.`data`::port
-        Configs.CONFIG.setVal2<Database, Int>({ it::port }, 3307)
+        Configs.CONFIG.setVal2<Database, Int>({ l }, 3307)
 
         println("port : ${config.port}")
 //        println("url : ${config.url}")

@@ -4,10 +4,7 @@ import java.lang.RuntimeException
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.Delegates
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
+import kotlin.reflect.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberProperties
 
@@ -28,14 +25,18 @@ import kotlin.reflect.full.memberProperties
 /**
  * Set the value for the chosen member property returned by [block] by accessing her delegate
  */
-inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.setVal2(crossinline block: (DATA) -> KProperty<TYPE>, value: TYPE) {
+inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.setVal2(crossinline block: (DATA) -> KMutableProperty0<TYPE>, value: TYPE) {
     val member = block.invoke(this.`data`)
 
     val p = block.invoke(data)
 
     delegates.forEach { entry ->
-        
-        println()
+        if (entry.key.name == p.name){
+            val anonymous = entry.value.invoke().get()
+            val delegated = anonymous::class.memberProperties.first() as KMutableProperty1
+            delegated.setter.call(anonymous, value)
+            println("value set in delegate")
+        }
     }
 
 //    delegates.filter { entry -> entry.key == member }.firstNotNullOf { entry ->
