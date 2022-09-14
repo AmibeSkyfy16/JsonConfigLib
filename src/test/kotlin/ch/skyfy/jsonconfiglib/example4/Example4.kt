@@ -3,8 +3,6 @@ package ch.skyfy.jsonconfiglib.example4
 import ch.skyfy.jsonconfiglib.*
 import ch.skyfy.jsonconfiglib.example4.config.Configs
 import ch.skyfy.jsonconfiglib.example4.config.Database
-import java.io.ObjectInputFilter.Config
-import javax.xml.crypto.Data
 import kotlin.test.Test
 
 class Example4 {
@@ -17,24 +15,28 @@ class Example4 {
         // They will be generated from the classes that implement the Defaultable interface or else json files that are located inside the jar will be copied where they are supposed to be
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
-        Configs.CONFIG.addGlobalNotifier { _, _, _ ->
-            println("Hey, a member property of ${Configs.CONFIG.`data`} has been set")
+        // add a global notifier. This means that every time a value is modified, the code will be called
+        Configs.CONFIG.addGlobalNotifier { _, _, _,data->
+            println("Hey, a member property of ${data.port} has been set")
             println("Updating sideboard with newValue ...")
         }
 
         // Now we can access the config
-        val config = Configs.CONFIG.`data`
+        val configData = Configs.CONFIG
+        val database = configData.`data`
 
-        println("port : ${config.port}")
-        println("url : ${config.url}")
+        println("port : ${database.port}")
+        println("url : ${database.url}")
 
-//        ConfigManager.computeAndSave(Configs.CONFIG, { data -> data.port = 3307 })
-//        Thread.sleep(5000)
-        val l = Configs.CONFIG.`data`::port
-        Configs.CONFIG.setVal2<Database, Int>({ l }, 3307)
+        println("config will be updated in 5 seconds")
+        Thread.sleep(5000)
 
-        println("port : ${config.port}")
-//        println("url : ${config.url}")
+        // See below how to set a value
+        // If you set the value of automaticallySave to true in Configs, the file json will be updated
+        configData.setValue(Database::port, database.port + 10)
+
+        println("port : ${database.port}")
+        println("url : ${database.url}")
     }
 
 }
