@@ -4,6 +4,7 @@ import ch.skyfy.jsonconfiglib.ConfigData
 import java.nio.file.Paths
 
 object Configs {
+
     /**
      * In this example we use a default JSON file located inside the jar
      */

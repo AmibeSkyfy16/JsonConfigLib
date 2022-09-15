@@ -1,11 +1,38 @@
 package ch.skyfy.jsonconfiglib
 
 import java.nio.file.Path
+import kotlin.reflect.KMutableProperty1
 
-inline fun <reified DATA : Validatable> ConfigData<DATA>.change(block: (DATA) -> Unit) {
-    block.invoke(data)
-    this.onChangesCallback.forEach {
-        it.invoke(data)
+inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<DATA, TYPE>, value: TYPE) {
+    val oldValue = prop.get(serializableData)
+    prop.set(serializableData, value)
+    this.onUpdateCallbacks.forEach {
+        it.invoke(prop, oldValue, value, serializableData)
+    }
+    this.onUpdateCallbacksMap.forEach { entry ->
+        if (entry.key.name == prop.name) entry.value.forEach { it.invoke(prop, oldValue, value, serializableData) }
+    }
+}
+
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<NESTED_DATA, TYPE>, nested: NESTED_DATA, value: TYPE) {
+    val oldValue = prop.get(nested)
+    prop.set(nested, value)
+    this.onUpdateCallbacks.forEach {
+        it.invoke(prop, oldValue, value, serializableData)
+    }
+    this.onUpdateCallbacksMap.forEach { entry ->
+        if (entry.key.name == prop.name) entry.value.forEach { it.invoke(prop, oldValue, value, serializableData) }
+    }
+}
+
+/**
+ * Allow user to add a block of code that will be called every time a member property of [DATA] is set
+ */
+fun <DATA : Validatable> ConfigData<DATA>.addGlobalNotifier(notifier: (KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit) = onUpdateCallbacks.add(notifier)
+
+fun <DATA : Validatable> ConfigData<DATA>.addNotifierOn(prop: KMutableProperty1<*, *>, notifier: (KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit) {
+    this.onUpdateCallbacksMap.compute(prop) { _, value ->
+        return@compute if (value == null) mutableListOf(notifier) else { value.add(notifier); value }
     }
 }
 
@@ -14,33 +41,36 @@ inline fun <reified DATA : Validatable> ConfigData<DATA>.change(block: (DATA) ->
  *
  * To create instance of a ConfigData object, we use special fun called invoke that accept reified generic type
  *
- * @property data An object of type [DATA] representing the configuration
+ * @property serializableData An object of type [DATA] representing the configuration
  * @property relativeFilePath A [Path] object representing where the configuration file is located
  */
-data class ConfigData<DATA : Validatable>(var data: DATA, val relativeFilePath: Path, val onChangesCallback: MutableList<(DATA) -> Unit>) {
+data class ConfigData<DATA : Validatable>(
+    var serializableData: DATA,
+    val relativeFilePath: Path,
+    val onUpdateCallbacks: MutableList<(KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit>,
+    val onUpdateCallbacksMap: MutableMap<KMutableProperty1<*, *>, MutableList<(KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit>>
+) {
     companion object {
         inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativeFilePath: Path, automaticallySave: Boolean): ConfigData<DATA> {
-            val data = ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath)
+            val serializableData = ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath)
 
-            val onChangesCallbacks = mutableListOf<(DATA)->Unit>()
-            if(automaticallySave)onChangesCallbacks.add { ConfigManager.save(data, relativeFilePath) }
+            val onUpdateCallbacks = mutableListOf<(KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit>()
+            if (automaticallySave) onUpdateCallbacks.add { _, _, _, _ -> ConfigManager.save(serializableData, relativeFilePath) }
 
-            return ConfigData(data, relativeFilePath, onChangesCallbacks)
+            val onUpdateCallbacksMap = mutableMapOf<KMutableProperty1<*, *>, MutableList<(KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit>>()
+
+            return ConfigData(serializableData, relativeFilePath, onUpdateCallbacks, onUpdateCallbacksMap)
         }
 
         inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String, automaticallySave: Boolean): ConfigData<DATA> {
-            val data = ConfigManager.getOrCreateConfig<DATA>(relativeFilePath, defaultFile)
+            val serializableData = ConfigManager.getOrCreateConfig<DATA>(relativeFilePath, defaultFile)
 
-            val onChangesCallbacks = mutableListOf<(DATA)->Unit>()
-            if(automaticallySave)onChangesCallbacks.add { ConfigManager.save(data, relativeFilePath) }
+            val onUpdateCallbacks = mutableListOf<(KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit>()
+            if (automaticallySave) onUpdateCallbacks.add { _, _, _, _ -> ConfigManager.save(serializableData, relativeFilePath) }
 
-            return ConfigData(data, relativeFilePath, onChangesCallbacks)
-        }
-    }
+            val onUpdateCallbacksMap = mutableMapOf<KMutableProperty1<*, *>, MutableList<(KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit>>()
 
-    init {
-        onChangesCallback.add {
-
+            return ConfigData(serializableData, relativeFilePath, onUpdateCallbacks, onUpdateCallbacksMap)
         }
     }
 

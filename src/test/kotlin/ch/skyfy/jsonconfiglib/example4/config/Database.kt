@@ -6,7 +6,7 @@ import ch.skyfy.jsonconfiglib.Validatable
 @kotlinx.serialization.Serializable
 data class Database(
     var port: Int,
-    val url: String,
+    var url: String,
 ) : Validatable {
     override fun validateImpl(errors: MutableList<String>) {
         if(port != 3306 && port != 3307)

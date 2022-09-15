@@ -42,7 +42,7 @@ object ConfigManager {
      */
     inline fun <reified DATA : Validatable> reloadConfig(configData: ConfigData<DATA>): Boolean {
         try {
-            configData.`data` = get(configData.relativeFilePath, shouldThrowRuntimeException = false)
+            configData.serializableData = get(configData.relativeFilePath, shouldThrowRuntimeException = false)
         } catch (e: Exception) {
             e.printStackTrace()
             LOGGER.error("The configuration cannot be reloaded due to errors")
@@ -154,11 +154,11 @@ object ConfigManager {
         configData: ConfigData<DATA>,
         json: Json = ConfigManager.json,
     ) {
-        if (!configData.`data`.confirmValidate(mutableListOf(), false)) {
+        if (!configData.serializableData.confirmValidate(mutableListOf(), false)) {
             LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
             return
         }
-        json.encodeToStream(configData.`data`, configData.relativeFilePath.outputStream())
+        json.encodeToStream(configData.serializableData, configData.relativeFilePath.outputStream())
     }
 
     inline fun <reified DATA : Validatable> computeAndSave(
@@ -166,7 +166,7 @@ object ConfigManager {
         block: (DATA) -> Unit,
         json: Json = ConfigManager.json,
     ) {
-        block.invoke(configData.`data`)
+        block.invoke(configData.serializableData)
         save(configData, json)
     }
 
