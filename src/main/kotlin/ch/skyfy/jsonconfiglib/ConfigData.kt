@@ -1,6 +1,7 @@
 package ch.skyfy.jsonconfiglib
 
 import java.nio.file.Path
+import kotlin.properties.Delegates
 import kotlin.reflect.KMutableProperty1
 
 inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<DATA, TYPE>, value: TYPE) = update(prop, serializableData, value)
@@ -66,15 +67,25 @@ class UpdateListOperation<DATA : Validatable, LIST_TYPE : Validatable>(
  *
  * To create instance of a ConfigData object, we use special fun called invoke that accept reified generic type
  *
- * @property serializableData An object of type [DATA] representing the configuration
+ * @property _serializableData An object of type [DATA] representing the configuration
  * @property relativeFilePath A [Path] object representing where the configuration file is located
  */
 data class ConfigData<DATA : Validatable>(
-    var serializableData: DATA,
+    private var _serializableData: DATA,
     val relativeFilePath: Path,
     val onUpdateCallbacks: MutableList<(Operation<DATA>) -> Unit>,
     val onUpdateCallbacksMap: MutableMap<KMutableProperty1<*, *>, MutableList<(Operation<DATA>) -> Unit>>
 ) {
+
+    var serializableData by Delegates.observable(_serializableData) { _, _, newValue ->
+        _serializableData = newValue
+        onReloadCallbacks.forEach { it.invoke(_serializableData) }
+    }
+
+    private var onReloadCallbacks: MutableList<(DATA) -> Unit> = mutableListOf()
+
+    fun registerOnReloadCallback(callback: (DATA) -> Unit) = onReloadCallbacks.add(callback)
+
     companion object {
         inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativeFilePath: Path, automaticallySave: Boolean) =
             invokeImpl(ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath), relativeFilePath, automaticallySave)

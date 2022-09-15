@@ -57,6 +57,11 @@ class Example2 {
             }
         }
 
+        // Register a callback called every time a config is reloaded
+        Configs.PLAYERS_HOMES.registerOnReloadCallback {
+            println("on reloaded")
+        }
+
         // Now we can access the config
         val configData = Configs.PLAYERS_HOMES
         val playersHomesConfig = configData.serializableData
@@ -89,7 +94,7 @@ class Example2 {
         configData.update<PlayersHomesConfig, Player, Int>(Player::maxHomes, playerToModify, 100)
 
         // Let's now sleep a short time, so we can edit manually players-homes.json file
-        Thread.sleep(20_000L)
+        Thread.sleep(10_000L)
         // Now if we want to be sure that the things we have edited are loaded
         ConfigManager.reloadConfig(Configs.PLAYERS_HOMES)
 
