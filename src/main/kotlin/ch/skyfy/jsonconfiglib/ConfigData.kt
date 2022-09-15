@@ -25,6 +25,24 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
     }
 }
 
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE : Validatable, reified TYPE : List<LIST_TYPE>> ConfigData<DATA>.updateList(
+    prop: KMutableProperty1<NESTED_DATA, TYPE>,
+    type: TYPE,
+    crossinline value: (TYPE) -> Unit
+) {
+
+    // TODO make a deep copy for type
+//    member.map{it.clone}.toList()
+
+    value.invoke(type) // Updating code
+    this.onUpdateCallbacks.forEach {
+        it.invoke(prop, type, type, serializableData)
+    }
+    this.onUpdateCallbacksMap.forEach { entry ->
+        if (entry.key.name == prop.name) entry.value.forEach { it.invoke(prop, type, type, serializableData) }
+    }
+}
+
 /**
  * Allow user to add a block of code that will be called every time a member property of [DATA] is set
  */
@@ -32,7 +50,9 @@ fun <DATA : Validatable> ConfigData<DATA>.addGlobalNotifier(notifier: (KMutableP
 
 fun <DATA : Validatable> ConfigData<DATA>.addNotifierOn(prop: KMutableProperty1<*, *>, notifier: (KMutableProperty1<*, *>, Any?, Any?, DATA) -> Unit) {
     this.onUpdateCallbacksMap.compute(prop) { _, value ->
-        return@compute if (value == null) mutableListOf(notifier) else { value.add(notifier); value }
+        return@compute if (value == null) mutableListOf(notifier) else {
+            value.add(notifier); value
+        }
     }
 }
 

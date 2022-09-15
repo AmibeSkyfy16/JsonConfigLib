@@ -5,7 +5,6 @@ import ch.skyfy.jsonconfiglib.example2.config.Configs
 import ch.skyfy.jsonconfiglib.example2.config.Home
 import ch.skyfy.jsonconfiglib.example2.config.Player
 import ch.skyfy.jsonconfiglib.example2.config.PlayersHomesConfig
-import ch.skyfy.jsonconfiglib.example4.config.Database
 import kotlin.reflect.jvm.jvmName
 import kotlin.test.Test
 
@@ -21,7 +20,7 @@ class Example2 {
 
         // add a global notifier. This means that every time a value is modified, the code will be called
         Configs.PLAYERS_HOMES.addGlobalNotifier { kMutableProperty1, oldValue, newValue, database ->
-            println("Hey, member property: ${kMutableProperty1.name} for ${database::class.jvmName} has been modified from $oldValue to $newValue")
+            println("Hey, member property: ${kMutableProperty1.name} for ${database::class.jvmName} has been modified from $oldValue\nto $newValue")
             println("Updating sideboard...")
             println("Updating game...")
         }
@@ -53,9 +52,29 @@ class Example2 {
             )
         )
 
+        val c = PlayersHomesConfig::players
+        configData.updateList<PlayersHomesConfig, PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players, playersHomesConfig.players) {
+            println("97928375329525")
+            it.add(
+                Player(
+                    mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
+                    "ebb5c153-3f6f-4fb6-9062-20ac564e7490", // uuid for skyfy16 (me)
+                    5, // 5 for me, but by default its 3
+                    0, // 0 for me, but by default its 15
+                    0 // 0 for me, but by default its 5
+                )
+            )
+        }
+        configData.updateList<PlayersHomesConfig, Player, Home, MutableList<Home>>(Player::homes,playersHomesConfig.players.first().homes){
+            for(i in 0..10){
+                it.add(Home(100, 100, 100, 0.0f, 0.0f, "secret base"))
+            }
+        }
+
         // Here we update maxHome property to 100 for first player in the list
         val playerToModify = playersHomesConfig.players.first()
         @Suppress("RemoveExplicitTypeArguments")
+        val l = Player::maxHomes
         configData.update<PlayersHomesConfig, Player, Int>(Player::maxHomes, playerToModify, 100)
 
         // When you modify a config, you have to save it to make sure the next time you stop and restart the server it's there
