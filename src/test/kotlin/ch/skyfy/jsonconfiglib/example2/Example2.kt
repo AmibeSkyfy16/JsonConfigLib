@@ -1,10 +1,12 @@
 package ch.skyfy.jsonconfiglib.example2
 
 import ch.skyfy.jsonconfiglib.*
+import ch.skyfy.jsonconfiglib.Set
 import ch.skyfy.jsonconfiglib.example2.config.Configs
 import ch.skyfy.jsonconfiglib.example2.config.Home
 import ch.skyfy.jsonconfiglib.example2.config.Player
 import ch.skyfy.jsonconfiglib.example2.config.PlayersHomesConfig
+import ch.skyfy.jsonconfiglib.example4.config.Database
 import kotlin.reflect.jvm.jvmName
 import kotlin.test.Test
 
@@ -19,16 +21,39 @@ class Example2 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // add a global notifier. This means that every time a value is modified, the code will be called
-        Configs.PLAYERS_HOMES.addGlobalNotifier { kMutableProperty1, oldValue, newValue, database ->
-            println("Hey, member property: ${kMutableProperty1.name} for ${database::class.jvmName} has been modified from $oldValue\nto $newValue")
-            println("Updating sideboard...")
-            println("Updating game...")
+        Configs.PLAYERS_HOMES.addGlobalNotifier { operation ->
+
+            if(operation is Set<PlayersHomesConfig>) {
+                val kMutableProperty1 = operation.prop
+                val oldValue = operation.oldValue
+                val newValue = operation.newValue
+                val database = operation.origin
+                println("Hey, member property: ${kMutableProperty1.name} for ${database::class.jvmName} has been set from $oldValue to $newValue")
+                println("Updating sideboard...")
+                println("Updating game...")
+                println()
+            }else if(operation is UpdateList<PlayersHomesConfig, *>){
+                val kMutableProperty1 = operation.prop
+                val newValue = operation.newValue
+                val playersHomesConfig = operation.origin
+                println("Hey, UpdateList !")
+                println("member property: ${kMutableProperty1.name} for origin ${playersHomesConfig::class.jvmName} has been updated")
+                println()
+            }
+
         }
 
         // You can also add a notifier on a custom property
         // Here we add a notifier on url property, mean each time url is set, the code below will be invoked
-        Configs.PLAYERS_HOMES.addNotifierOn(Player::maxHomes) { kMutableProperty1, oldValue, newValue, playersHomesConfig ->
-            println("Hey, maxHomes has been modified to $newValue")
+        Configs.PLAYERS_HOMES.addNotifierOn(Player::maxHomes) {operation ->
+            if(operation is Set<PlayersHomesConfig>) {
+                val kMutableProperty1 = operation.prop
+                val oldValue = operation.oldValue
+                val newValue = operation.newValue
+                val database = operation.origin
+                println("Hey, maxHomes has been modified to $newValue")
+                println()
+            }
         }
 
         // Now we can access the config
@@ -36,25 +61,24 @@ class Example2 {
         val playersHomesConfig = configData.serializableData
 
         // Here we add two new players with one new home
-        playersHomesConfig.players.add(
-            Player(
-                mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
-                "ebb5c153-3f6f-4fb6-9062-20ac564e7490", // uuid for skyfy16 (me)
-                5, // 5 for me, but by default its 3
-                0, // 0 for me, but by default its 15
-                0 // 0 for me, but by default its 5
-            )
-        )
-        playersHomesConfig.players.add(
-            Player(
-                mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
-                "8faaf447-227f-486d-be86-789ec2acb507"
-            )
-        )
+//        playersHomesConfig.players.add(
+//            Player(
+//                mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
+//                "ebb5c153-3f6f-4fb6-9062-20ac564e7490", // uuid for skyfy16 (me)
+//                5, // 5 for me, but by default its 3
+//                0, // 0 for me, but by default its 15
+//                0 // 0 for me, but by default its 5
+//            )
+//        )
+//        playersHomesConfig.players.add(
+//            Player(
+//                mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
+//                "8faaf447-227f-486d-be86-789ec2acb507"
+//            )
+//        )
 
-        val c = PlayersHomesConfig::players
+
         configData.updateList<PlayersHomesConfig, PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players, playersHomesConfig.players) {
-            println("97928375329525")
             it.add(
                 Player(
                     mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),

@@ -1,9 +1,7 @@
 package ch.skyfy.jsonconfiglib.example4
 
-import ch.skyfy.jsonconfiglib.ConfigManager
-import ch.skyfy.jsonconfiglib.addGlobalNotifier
-import ch.skyfy.jsonconfiglib.addNotifierOn
-import ch.skyfy.jsonconfiglib.update
+import ch.skyfy.jsonconfiglib.*
+import ch.skyfy.jsonconfiglib.Set
 import ch.skyfy.jsonconfiglib.example4.config.Configs
 import ch.skyfy.jsonconfiglib.example4.config.Database
 import kotlin.reflect.jvm.jvmName
@@ -21,16 +19,28 @@ class Example4 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // add a global notifier. This means that every time a value is modified, the code will be called
-        Configs.CONFIG.addGlobalNotifier { kMutableProperty1, oldValue, newValue, database ->
-            println("Hey, member property: ${kMutableProperty1.name} for ${database::class.jvmName} has been modified from $oldValue to $newValue")
-            println("Updating sideboard...")
-            println("Updating game...")
+        Configs.CONFIG.addGlobalNotifier { operation ->
+            if(operation is Set<Database>) {
+                val kMutableProperty1 = operation.prop
+                val oldValue = operation.oldValue
+                val newValue = operation.newValue
+                val database = operation.origin
+                println("Hey, member property: ${kMutableProperty1.name} for ${database::class.jvmName} has been set from $oldValue to $newValue")
+                println("Updating sideboard...")
+                println("Updating game...")
+            }
         }
 
         // You can also add a notifier on a custom property
         // Here we add a notifier on url property, mean each time url is set, the code below will be invoked
-        Configs.CONFIG.addNotifierOn(Database::url) { kMutableProperty1, oldValue, newValue, database ->
-            println("Hey, url has been modified to $newValue")
+        Configs.CONFIG.addNotifierOn(Database::url) { operation ->
+            if(operation is Set<Database>) {
+                val kMutableProperty1 = operation.prop
+                val oldValue = operation.oldValue
+                val newValue = operation.newValue
+                val database = operation.origin
+                println("Hey, url has been modified to $newValue")
+            }
         }
 
         // Now we can access the config
