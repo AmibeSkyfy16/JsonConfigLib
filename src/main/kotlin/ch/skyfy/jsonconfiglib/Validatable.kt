@@ -4,7 +4,7 @@ package ch.skyfy.jsonconfiglib
 
 import ch.skyfy.jsonconfiglib.ConfigManager.LOGGER
 
-interface Validatable {
+interface Validatable : Cloneable{
 
     /**
      * A typo or a mistake can happen quickly.

@@ -19,7 +19,7 @@ class Example4 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // add a global notifier. This means that every time the config is updated, the code will be called
-        Configs.CONFIG.addGlobalNotifier { operation ->
+        Configs.CONFIG.registerOnUpdate { operation ->
             if(operation is SetOperation<Database>) {
                 val kMutableProperty1 = operation.prop
                 val oldValue = operation.oldValue
@@ -33,7 +33,7 @@ class Example4 {
 
         // You can also add a notifier on a custom property
         // Here we add a notifier on url property, mean each time url is set, the code below will be invoked
-        Configs.CONFIG.addNotifierOn(Database::url) { operation ->
+        Configs.CONFIG.registerOnUpdateOn(Database::url) { operation ->
             if(operation is SetOperation<Database>) {
                 val kMutableProperty1 = operation.prop
                 val oldValue = operation.oldValue

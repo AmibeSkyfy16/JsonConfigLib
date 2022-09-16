@@ -4,47 +4,43 @@ import java.nio.file.Path
 import kotlin.properties.Delegates
 import kotlin.reflect.KMutableProperty1
 
-inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<DATA, TYPE>, value: TYPE) = update(prop, serializableData, value)
+/**
+ * Update/Set a value for a member property of [DATA] and call all registered callbacks. See ConfigData onUpdateCallbacks
+ */
+inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<DATA, TYPE>, value: TYPE) = updateNested(prop, serializableData, value)
 
-inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<NESTED_DATA, TYPE>, nested: NESTED_DATA, value: TYPE) {
-    val oldValue = prop.get(nested)
+/**
+ * Use to update a [List]
+ *
+ * @param prop A [KMutableProperty1] use to identify on which property the value must be set
+ * @param list The [List] where to modification will be done
+ * @param block A block of code use to update the list (remove or add an object of type [LIST_TYPE])
+ */
+inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateList(prop: KMutableProperty1<DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) = updateListNested(prop, list, block)
+
+/**
+ * @see update
+ */
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.updateNested(prop: KMutableProperty1<NESTED_DATA, TYPE>, nested: NESTED_DATA, value: TYPE) {
     prop.set(nested, value)
 
-    val operation = SetOperation(prop, oldValue, value, serializableData)
+    val operation = SetOperation(prop, prop.get(nested), value, serializableData)
 
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
 }
 
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE : Validatable, reified TYPE : List<LIST_TYPE>> ConfigData<DATA>.updateList(
-    prop: KMutableProperty1<NESTED_DATA, TYPE>,
-    type: TYPE,
-    crossinline block: (TYPE) -> Unit
-) {
-
-    // TODO make a deep copy for type, so we can add oldValue
-//    member.map{it.clone}.toList()
-
-    val operation = UpdateListOperation(prop, type, serializableData)
-
-    block.invoke(type) // Updating code
-    this.onUpdateCallbacks.forEach {
-        it.invoke(operation)
-    }
-    this.onUpdateCallbacksMap.forEach { entry ->
-        if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) }
-    }
-}
-
 /**
- * Allow user to add a block of code that will be called every time a member property of [DATA] is set
+ * @see updateList
  */
-fun <DATA : Validatable> ConfigData<DATA>.addGlobalNotifier(notifier: (Operation<DATA>) -> Unit) = onUpdateCallbacks.add(notifier)
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateListNested(prop: KMutableProperty1<NESTED_DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) {
+    // TODO make a deep copy for list, so we can add oldValue
 
-fun <DATA : Validatable> ConfigData<DATA>.addNotifierOn(prop: KMutableProperty1<*, *>, notifier: (Operation<DATA>) -> Unit) {
-    this.onUpdateCallbacksMap.compute(prop) { _, value ->
-        return@compute if (value == null) mutableListOf(notifier) else { value.add(notifier); value }
-    }
+    val operation = UpdateListOperation(prop, list, serializableData)
+
+    block.invoke(list) // Updating member property
+    this.onUpdateCallbacks.forEach { it.invoke(operation) }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
 }
 
 abstract class Operation<DATA : Validatable>
@@ -63,18 +59,19 @@ class UpdateListOperation<DATA : Validatable, LIST_TYPE : Validatable>(
 ) : Operation<DATA>()
 
 /**
- * A data class representing a specific configuration
+ * A serializable data class representing a specific configuration
  *
  * To create instance of a ConfigData object, we use special fun called invoke that accept reified generic type
  *
  * @property _serializableData An object of type [DATA] representing the configuration
- * @property relativeFilePath A [Path] object representing where the configuration file is located
+ * @property relativePath A [Path] object representing where the configuration file is located
+ * @property onUpdateCallbacks A [List] of callbacks which will be called every time a member property of [DATA] is updated
+ * @property onUpdateCallbacksMap A [Map] of callbacks for specific member property of [DATA] which will be called whenever one of them is updated
  */
 data class ConfigData<DATA : Validatable>(
     private var _serializableData: DATA,
-    val relativeFilePath: Path,
-    val onUpdateCallbacks: MutableList<(Operation<DATA>) -> Unit>,
-    val onUpdateCallbacksMap: MutableMap<KMutableProperty1<*, *>, MutableList<(Operation<DATA>) -> Unit>>
+    val relativePath: Path,
+    val onUpdateCallbacks: MutableList<(Operation<DATA>) -> Unit>
 ) {
 
     var serializableData by Delegates.observable(_serializableData) { _, _, newValue ->
@@ -82,22 +79,40 @@ data class ConfigData<DATA : Validatable>(
         onReloadCallbacks.forEach { it.invoke(_serializableData) }
     }
 
+    val onUpdateCallbacksMap = mutableMapOf<KMutableProperty1<*, *>, MutableList<(Operation<DATA>) -> Unit>>()
+
     private var onReloadCallbacks: MutableList<(DATA) -> Unit> = mutableListOf()
 
-    fun registerOnReloadCallback(callback: (DATA) -> Unit) = onReloadCallbacks.add(callback)
+    /**
+     * Allow user to add a block of code that will be called every time a DATA is reloaded from a file
+     */
+    fun registerOnReload(callback: (DATA) -> Unit) = onReloadCallbacks.add(callback)
+
+    /**
+     * Allow user to add a block of code that will be called every time the specified member property is set
+     */
+    fun registerOnUpdateOn(prop: KMutableProperty1<*, *>, callback: (Operation<DATA>) -> Unit) {
+        this.onUpdateCallbacksMap.compute(prop) { _, value ->
+            return@compute if (value == null) mutableListOf(callback) else { value.add(callback); value }
+        }
+    }
+
+    /**
+     * Allow user to add a block of code that will be called every time a member property of [DATA] is set
+     */
+    fun registerOnUpdate(callback: (Operation<DATA>) -> Unit) = onUpdateCallbacks.add(callback)
 
     companion object {
-        inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativeFilePath: Path, automaticallySave: Boolean) =
-            invokeImpl(ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativeFilePath), relativeFilePath, automaticallySave)
+        inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativePath: Path, automaticallySave: Boolean) =
+            invokeImpl(ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativePath), relativePath, automaticallySave)
 
         inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String, automaticallySave: Boolean) =
             invokeImpl(ConfigManager.getOrCreateConfig<DATA>(relativeFilePath, defaultFile), relativeFilePath, automaticallySave)
 
-        inline fun <reified DATA : Validatable> invokeImpl(serializableData: DATA, relativeFilePath: Path, automaticallySave: Boolean): ConfigData<DATA> {
+        inline fun <reified DATA : Validatable> invokeImpl(serializableData: DATA, relativePath: Path, automaticallySave: Boolean): ConfigData<DATA> {
             val onUpdateCallbacks = mutableListOf<(Operation<DATA>) -> Unit>()
-            if (automaticallySave) onUpdateCallbacks.add { ConfigManager.save(serializableData, relativeFilePath) }
-            val onUpdateCallbacksMap = mutableMapOf<KMutableProperty1<*, *>, MutableList<(Operation<DATA>) -> Unit>>()
-            return ConfigData(serializableData, relativeFilePath, onUpdateCallbacks, onUpdateCallbacksMap)
+            if (automaticallySave) onUpdateCallbacks.add { ConfigManager.save(serializableData, relativePath) }
+            return ConfigData(serializableData, relativePath, onUpdateCallbacks)
         }
     }
 

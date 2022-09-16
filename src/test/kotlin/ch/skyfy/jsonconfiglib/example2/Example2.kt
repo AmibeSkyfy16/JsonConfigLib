@@ -23,7 +23,7 @@ class Example2 {
         ConfigManager.loadConfigs(arrayOf(Configs::class.java))
 
         // add a global notifier. This means that every time the config is updated, the code will be called
-        Configs.PLAYERS_HOMES.addGlobalNotifier { operation ->
+        Configs.PLAYERS_HOMES.registerOnUpdate { operation ->
             if(operation is SetOperation<PlayersHomesConfig>) {
                 val kMutableProperty1 = operation.prop
                 val oldValue = operation.oldValue
@@ -46,7 +46,7 @@ class Example2 {
 
         // You can also add a notifier on a custom property
         // Here we add a notifier on maxHomes property, mean each time url is set, the code below will be invoked
-        Configs.PLAYERS_HOMES.addNotifierOn(Player::maxHomes) {operation ->
+        Configs.PLAYERS_HOMES.registerOnUpdateOn(Player::maxHomes) { operation ->
             if(operation is SetOperation<PlayersHomesConfig>) {
                 val kMutableProperty1 = operation.prop
                 val oldValue = operation.oldValue
@@ -58,7 +58,7 @@ class Example2 {
         }
 
         // Register a callback called every time a config is reloaded
-        Configs.PLAYERS_HOMES.registerOnReloadCallback {
+        Configs.PLAYERS_HOMES.registerOnReload {
             println("on reloaded")
         }
 
@@ -66,7 +66,7 @@ class Example2 {
         val configData = Configs.PLAYERS_HOMES
         val playersHomesConfig = configData.serializableData
 
-        configData.updateList<PlayersHomesConfig, PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players, playersHomesConfig.players) {
+        configData.updateListNested<PlayersHomesConfig, PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players, playersHomesConfig.players) {
             it.add(
                 Player(
                     mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
@@ -83,7 +83,18 @@ class Example2 {
                 )
             )
         }
-        configData.updateList<PlayersHomesConfig, Player, Home, MutableList<Home>>(Player::homes,playersHomesConfig.players.first().homes){
+        //or
+        configData.updateList<PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players, playersHomesConfig.players) {
+            it.add(
+                Player(
+                    mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
+                    "8faaf447-227f-486d-be86-789ec2acb507"
+                )
+            )
+        }
+
+
+        configData.updateListNested<PlayersHomesConfig, Player, Home, MutableList<Home>>(Player::homes, playersHomesConfig.players.first().homes){
             for(i in 0..10){
                 it.add(Home(100, 100, 100, 0.0f, 0.0f, "secret base"))
             }
@@ -91,7 +102,7 @@ class Example2 {
 
         // Here we update maxHome property to 100 for first player in the list
         val playerToModify = playersHomesConfig.players.first()
-        configData.update<PlayersHomesConfig, Player, Int>(Player::maxHomes, playerToModify, 100)
+        configData.updateNested<PlayersHomesConfig, Player, Int>(Player::maxHomes, playerToModify, 100)
 
         // Let's now sleep a short time, so we can edit manually players-homes.json file
         Thread.sleep(10_000L)
