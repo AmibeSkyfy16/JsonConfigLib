@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation("ch.skyfy.jsonconfiglib:json-config-lib:3.0.0")!!
+    implementation("ch.skyfy.jsonconfiglib:json-config-lib:3.0.5")!!
 }
 ```
 
