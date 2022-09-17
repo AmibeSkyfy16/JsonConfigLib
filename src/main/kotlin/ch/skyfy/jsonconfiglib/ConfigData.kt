@@ -22,10 +22,8 @@ inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified
  * @see update
  */
 inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.updateNested(prop: KMutableProperty1<NESTED_DATA, TYPE>, nested: NESTED_DATA, value: TYPE) {
-    prop.set(nested, value)
-
     val operation = SetOperation(prop, prop.get(nested), value, serializableData)
-
+    prop.set(nested, value)
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
 }
