@@ -8,102 +8,102 @@ import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 
 /**
- * Update/Set a value for a member property of [DATA] and call all registered callbacks. See ConfigData onUpdateCallbacks
+ * @see updateNested
  */
-inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(prop: KMutableProperty1<DATA, TYPE>, value: TYPE) = updateNested(prop, serializableData, value)
+inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(kMutableProperty1: KMutableProperty1<DATA, TYPE>, value: TYPE) = updateNested(kMutableProperty1, serializableData, value)
 
 /**
- * Use to update a [List]
+ * Set the [newValue] for the specified [kMutableProperty1] on the [receiver] object passed as parameter
  *
- * @param prop A [KProperty1] use to identify on which property the value must be set
- * @param list The [List] where to modification will be done
- * @param block A block of code use to update the list (remove or add an object of type [LIST_TYPE])
- */
-inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateList(prop: KProperty1<DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) = updateListNested(prop, list, block)
-
-/**
- * Use to update a [Map]
+ * Also call registered callbacks, the global registered callbacks and specific registered callback if needed
  *
- * @param prop A [KProperty1] use to identify on which property the value must be set
- * @param map The [Map] where to modification will be done
- * @param block A block of code use to update the list (remove or add an object of type [MAP_VALUE])
+ * @param kMutableProperty1 A [KMutableProperty1] use to identify on which property the value must be set
+ * @param receiver An object of type [NESTED_DATA] on which the value need to be set
+ * @param newValue An object of type [TYPE] which will be used as the new value
  */
-inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(prop: KProperty1<DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) = updateMapNested(prop, map, block)
-
-/**
- * Use to update a [CUSTOM_TYPE]
- *
- * @param prop A [KProperty1] use to identify on which property the value must be set
- * @param customObject The [CUSTOM_TYPE] where to modification will be done
- * @param block A block of code use to update the [CUSTOM_TYPE]
- */
-inline fun <reified DATA : Validatable, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustom(prop: KProperty1<DATA, CUSTOM_TYPE>, customObject: CUSTOM_TYPE, crossinline block: (CUSTOM_TYPE) -> Unit) = updateCustomNested(prop, customObject, block)
-
-/**
- * @see update
- */
-inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.updateNested(prop: KMutableProperty1<NESTED_DATA, TYPE>, nested: NESTED_DATA, value: TYPE) {
-    val operation = SetOperation(prop, prop.get(nested), value, serializableData)
-    prop.set(nested, value)
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.updateNested(kMutableProperty1: KMutableProperty1<NESTED_DATA, TYPE>, receiver: NESTED_DATA, newValue: TYPE) {
+    val operation = SetOperation(kMutableProperty1, receiver, kMutableProperty1.get(receiver), newValue, serializableData)
+    kMutableProperty1.set(receiver, newValue)
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
-    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kMutableProperty1.name) entry.value.forEach { it.invoke(operation) } }
 }
 
-/**
- * @see updateList
- */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateListNested(prop: KProperty1<NESTED_DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) {
-    // TODO make a deep copy for list, so we can add oldValue
-
-    val operation = UpdateListOperation(prop, list, serializableData)
-
-    block.invoke(list)
-    this.onUpdateCallbacks.forEach { it.invoke(operation) }
-    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
-}
 
 /**
- * @see updateMap
+ * @see updateMapNested
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(prop: KProperty1<NESTED_DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) {
+inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(kProperty1: KProperty1<DATA, MAP>, crossinline block: (MAP) -> Unit) = updateMapNested(kProperty1, kProperty1.get(serializableData), block)
+
+/**
+ * Update the [map] for the specified [kProperty1]
+ *
+ * Also call registered callbacks, the global registered callbacks and specific registered callback if needed
+ *
+ * @param kProperty1 A [KProperty1] use to identify on which property the update must be done
+ * @param map An object of type [MAP] on which the update will be done
+ * @param block A block of code use to update the [map] (put, compute, remove, etc.)
+ */
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(kProperty1: KProperty1<NESTED_DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) {
     // TODO make a deep copy for map, so we can add oldValue
-
-    val operation = UpdateMapOperation(prop, map, serializableData)
-
+    val operation = UpdateMapOperation(kProperty1, map, serializableData)
     block.invoke(map)
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
-    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kProperty1.name) entry.value.forEach { it.invoke(operation) } }
 }
 
+
 /**
- * @see updateCustom
+ * @see updateIterableNested
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustomNested(
-    prop: KProperty1<NESTED_DATA, CUSTOM_TYPE>,
-    map: CUSTOM_TYPE,
-    crossinline block: (CUSTOM_TYPE) -> Unit
-) {
-    // TODO make a deep copy for map, so we can add oldValue
+inline fun <reified DATA : Validatable, reified ITERABLE_TYPE, reified ITERABLE : Iterable<ITERABLE_TYPE>> ConfigData<DATA>.updateIterable(kProperty1: KProperty1<DATA, ITERABLE>, crossinline block: (ITERABLE) -> Unit) = updateIterableNested(kProperty1, kProperty1.get(serializableData), block)
 
-    val operation = UpdateCustomOperation(prop, map, serializableData)
-
-    block.invoke(map)
+/**
+ * Update the [iterable] for the specified [kProperty1]
+ *
+ * Also call registered callbacks, the global registered callbacks and specific registered callback if needed
+ *
+ * @param kProperty1 A [KProperty1] use to identify on which property the update must be done
+ * @param iterable An object of type [ITERABLE] on which the update will be done
+ * @param block A block of code use to update the [iterable] (add, remove)
+ */
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified ITERABLE_TYPE, reified ITERABLE : Iterable<ITERABLE_TYPE>> ConfigData<DATA>.updateIterableNested(kProperty1: KProperty1<NESTED_DATA, ITERABLE>, iterable: ITERABLE, crossinline block: (ITERABLE) -> Unit) {
+    // TODO make a deep copy for iterable, so we can add oldValue
+    val operation = UpdateIterableOperation(kProperty1, iterable, serializableData)
+    block.invoke(iterable)
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
-    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kProperty1.name) entry.value.forEach { it.invoke(operation) } }
+}
+
+
+/**
+ * @see updateCustomNested
+ */
+inline fun <reified DATA : Validatable, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustom(kProperty1: KProperty1<DATA, CUSTOM_TYPE>, customObject: CUSTOM_TYPE, crossinline block: (CUSTOM_TYPE) -> Unit) = updateCustomNested(kProperty1, customObject, block)
+
+/**
+ * Use only this fun in the case of the others one like [updateNested], [updateIterable] don't work
+ */
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustomNested(kProperty1: KProperty1<NESTED_DATA, CUSTOM_TYPE>, custom: CUSTOM_TYPE, crossinline block: (CUSTOM_TYPE) -> Unit) {
+    // TODO make a deep copy for map, so we can add oldValue
+    val operation = UpdateCustomOperation(kProperty1, custom, serializableData)
+    block.invoke(custom)
+    this.onUpdateCallbacks.forEach { it.invoke(operation) }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kProperty1.name) entry.value.forEach { it.invoke(operation) } }
 }
 
 abstract class Operation<DATA : Validatable>
 
-class SetOperation<DATA : Validatable>(
+class SetOperation<DATA : Validatable, NESTED_DATA : Validatable>(
     val prop: KMutableProperty1<*, *>,
+    val receiver: NESTED_DATA,
     val oldValue: Any?,
     val newValue: Any?,
     val origin: DATA
 ) : Operation<DATA>()
 
-class UpdateListOperation<DATA : Validatable, LIST_TYPE : Validatable>(
+class UpdateIterableOperation<DATA : Validatable, ITERABLE_TYPE>(
     val prop: KProperty1<*, *>,
-    val newValue: List<LIST_TYPE>,
+    val newValue: Iterable<ITERABLE_TYPE>,
     val origin: DATA
 ) : Operation<DATA>()
 
@@ -154,7 +154,9 @@ data class ConfigData<DATA : Validatable>(
      */
     fun registerOnUpdateOn(prop: KMutableProperty1<*, *>, callback: (Operation<DATA>) -> Unit) {
         this.onUpdateCallbacksMap.compute(prop) { _, value ->
-            return@compute if (value == null) mutableListOf(callback) else { value.add(callback); value }
+            return@compute if (value == null) mutableListOf(callback) else {
+                value.add(callback); value
+            }
         }
     }
 

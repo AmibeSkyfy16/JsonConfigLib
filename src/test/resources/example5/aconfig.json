@@ -1,0 +1,232 @@
+{
+    "port": 22,
+    "url": "127.0.0.1",
+    "b": {
+        "aInt": -1,
+        "aString": "I am a default B",
+        "bb": {
+            "bbb": {
+                "iAmBBB": "I am BBB from a default B"
+            },
+            "list": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "mutableList": [
+                "A",
+                "B",
+                "C",
+                "Hello buddies",
+                "Hello buddies"
+            ],
+            "map": {
+                "A": "AA",
+                "B": "BB"
+            },
+            "mutableMap": {
+                "A": "AA",
+                "B": "BB",
+                "bwah-bwah": "bwah"
+            },
+            "set": [
+                "BB UUID"
+            ],
+            "mutableSet": [
+                "BB ANOTHER UUID"
+            ]
+        },
+        "mutableSet": [
+            "B UUID"
+        ],
+        "mutableList": [
+            "Hey"
+        ],
+        "mutableMap": {
+            "Hey": "Hello"
+        }
+    },
+    "mutableList": [
+        "ROOT",
+        "Size is two now",
+        "Size is three now"
+    ],
+    "map": {
+        "Pitch": 90.0
+    },
+    "bMap": {
+        "B1": {
+            "aInt": 188,
+            "aString": "Im B",
+            "bb": {
+                "bbb": {
+                    "iAmBBB": "I am BBB"
+                },
+                "list": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "mutableList": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "map": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "mutableMap": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "set": [
+                    "BB UUID"
+                ],
+                "mutableSet": [
+                    "BB ANOTHER UUID"
+                ]
+            },
+            "mutableSet": [
+                "B UUID"
+            ],
+            "mutableList": [
+                "Hey"
+            ],
+            "mutableMap": {
+                "Hey": "Hello"
+            }
+        },
+        "b2": {
+            "aInt": 199,
+            "aString": "Im B",
+            "bb": {
+                "bbb": {
+                    "iAmBBB": "I am BBB"
+                },
+                "list": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "mutableList": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "map": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "mutableMap": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "set": [
+                    "BB UUID"
+                ],
+                "mutableSet": [
+                    "BB ANOTHER UUID"
+                ]
+            },
+            "mutableSet": [
+                "B UUID"
+            ],
+            "mutableList": [
+                "Hey"
+            ],
+            "mutableMap": {
+                "Hey": "Hello"
+            }
+        },
+        "z": {
+            "aInt": -1,
+            "aString": "I am a default B",
+            "bb": {
+                "bbb": {
+                    "iAmBBB": "I am BBB from a default B"
+                },
+                "list": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "mutableList": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "map": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "mutableMap": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "set": [
+                    "BB UUID"
+                ],
+                "mutableSet": [
+                    "BB ANOTHER UUID"
+                ]
+            },
+            "mutableSet": [
+                "B UUID"
+            ],
+            "mutableList": [
+                "Hey"
+            ],
+            "mutableMap": {
+                "Hey": "Hello"
+            }
+        },
+        "zz": {
+            "aInt": -1,
+            "aString": "I am a default B",
+            "bb": {
+                "bbb": {
+                    "iAmBBB": "I am BBB from a default B"
+                },
+                "list": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "mutableList": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "map": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "mutableMap": {
+                    "A": "AA",
+                    "B": "BB"
+                },
+                "set": [
+                    "BB UUID"
+                ],
+                "mutableSet": [
+                    "BB ANOTHER UUID"
+                ]
+            },
+            "mutableSet": [
+                "B UUID"
+            ],
+            "mutableList": [
+                "Hey"
+            ],
+            "mutableMap": {
+                "Hey": "Hello"
+            }
+        }
+    }
+}
