@@ -30,6 +30,14 @@ inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified
  */
 inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(prop: KProperty1<DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) = updateMapNested(prop, map, block)
 
+/**
+ * Use to update a [CUSTOM_TYPE]
+ *
+ * @param prop A [KProperty1] use to identify on which property the value must be set
+ * @param customObject The [CUSTOM_TYPE] where to modification will be done
+ * @param block A block of code use to update the [CUSTOM_TYPE]
+ */
+inline fun <reified DATA : Validatable, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustom(prop: KProperty1<DATA, CUSTOM_TYPE>, customObject: CUSTOM_TYPE, crossinline block: (CUSTOM_TYPE) -> Unit) = updateCustomNested(prop, customObject, block)
 
 /**
  * @see update
@@ -49,7 +57,7 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE :
 
     val operation = UpdateListOperation(prop, list, serializableData)
 
-    block.invoke(list) // Updating member property
+    block.invoke(list)
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
 }
@@ -62,7 +70,24 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA, reified MAP_KEY, re
 
     val operation = UpdateMapOperation(prop, map, serializableData)
 
-    block.invoke(map) // Updating member property
+    block.invoke(map)
+    this.onUpdateCallbacks.forEach { it.invoke(operation) }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
+}
+
+/**
+ * @see updateCustom
+ */
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustomNested(
+    prop: KProperty1<NESTED_DATA, CUSTOM_TYPE>,
+    map: CUSTOM_TYPE,
+    crossinline block: (CUSTOM_TYPE) -> Unit
+) {
+    // TODO make a deep copy for map, so we can add oldValue
+
+    val operation = UpdateCustomOperation(prop, map, serializableData)
+
+    block.invoke(map)
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
 }
@@ -85,6 +110,12 @@ class UpdateListOperation<DATA : Validatable, LIST_TYPE : Validatable>(
 class UpdateMapOperation<DATA : Validatable, MAP_KEY, MAP_VALUE>(
     val prop: KProperty1<*, *>,
     val newValue: Map<MAP_KEY, MAP_VALUE>,
+    val origin: DATA
+) : Operation<DATA>()
+
+class UpdateCustomOperation<DATA : Validatable, CUSTOM_TYPE>(
+    val prop: KProperty1<*, *>,
+    val newValue: CUSTOM_TYPE,
     val origin: DATA
 ) : Operation<DATA>()
 

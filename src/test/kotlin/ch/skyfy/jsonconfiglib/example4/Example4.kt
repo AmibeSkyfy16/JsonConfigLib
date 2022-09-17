@@ -54,6 +54,10 @@ class Example4 {
         Configs.CONFIG.update(Database::port, 3307)
         Configs.CONFIG.update(Database::url, "127.0.0.1")
 
+        // Some other example
+//        Configs.CONFIG.updateMap(Database::map, database.map) { it.remove("") }
+//        Configs.CONFIG.updateCustom(Database::map, database.map) { it.remove("") }
+
         // Another example
 //        Configs.CONFIG.update<Database, Database, String>(Database::url, database,"127.0.0.1")
 

@@ -7,6 +7,7 @@ import ch.skyfy.jsonconfiglib.Validatable
 data class Database(
     var port: Int,
     var url: String,
+    var map: MutableMap<String, Float>
 ) : Validatable {
     override fun validateImpl(errors: MutableList<String>) {
         if(port != 3306 && port != 3307)
@@ -16,5 +17,5 @@ data class Database(
 
 @Suppress("unused")
 class DefaultDatabase : Defaultable<Database> {
-    override fun getDefault() = Database(3306, "localhost")
+    override fun getDefault() = Database(3306, "localhost", mutableMapOf())
 }
