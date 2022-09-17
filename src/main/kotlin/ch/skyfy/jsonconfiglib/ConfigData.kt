@@ -3,6 +3,7 @@ package ch.skyfy.jsonconfiglib
 import java.nio.file.Path
 import kotlin.properties.Delegates
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 
 /**
  * Update/Set a value for a member property of [DATA] and call all registered callbacks. See ConfigData onUpdateCallbacks
@@ -16,7 +17,7 @@ inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(pr
  * @param list The [List] where to modification will be done
  * @param block A block of code use to update the list (remove or add an object of type [LIST_TYPE])
  */
-inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateList(prop: KMutableProperty1<DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) = updateListNested(prop, list, block)
+inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateList(prop: KProperty1<DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) = updateListNested(prop, list, block)
 
 /**
  * @see update
@@ -31,7 +32,7 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
 /**
  * @see updateList
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateListNested(prop: KMutableProperty1<NESTED_DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) {
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateListNested(prop: KProperty1<NESTED_DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) {
     // TODO make a deep copy for list, so we can add oldValue
 
     val operation = UpdateListOperation(prop, list, serializableData)
@@ -51,7 +52,7 @@ class SetOperation<DATA : Validatable>(
 ) : Operation<DATA>()
 
 class UpdateListOperation<DATA : Validatable, LIST_TYPE : Validatable>(
-    val prop: KMutableProperty1<*, *>,
+    val prop: KProperty1<*, *>,
     val newValue: List<LIST_TYPE>,
     val origin: DATA
 ) : Operation<DATA>()
