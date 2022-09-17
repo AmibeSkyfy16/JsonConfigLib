@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package ch.skyfy.jsonconfiglib
 
 import java.nio.file.Path
@@ -13,11 +15,21 @@ inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(pr
 /**
  * Use to update a [List]
  *
- * @param prop A [KMutableProperty1] use to identify on which property the value must be set
+ * @param prop A [KProperty1] use to identify on which property the value must be set
  * @param list The [List] where to modification will be done
  * @param block A block of code use to update the list (remove or add an object of type [LIST_TYPE])
  */
 inline fun <reified DATA : Validatable, reified LIST_TYPE : Validatable, reified LIST : List<LIST_TYPE>> ConfigData<DATA>.updateList(prop: KProperty1<DATA, LIST>, list: LIST, crossinline block: (LIST) -> Unit) = updateListNested(prop, list, block)
+
+/**
+ * Use to update a [Map]
+ *
+ * @param prop A [KProperty1] use to identify on which property the value must be set
+ * @param map The [Map] where to modification will be done
+ * @param block A block of code use to update the list (remove or add an object of type [MAP_VALUE])
+ */
+inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE : Validatable, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(prop: KProperty1<DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) = updateMapNested(prop, map, block)
+
 
 /**
  * @see update
@@ -42,6 +54,19 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA, reified LIST_TYPE :
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
 }
 
+/**
+ * @see updateMap
+ */
+inline fun <reified DATA : Validatable, reified NESTED_DATA, reified MAP_KEY, reified MAP_VALUE : Validatable, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(prop: KProperty1<NESTED_DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) {
+    // TODO make a deep copy for map, so we can add oldValue
+
+    val operation = UpdateMapOperation(prop, map, serializableData)
+
+    block.invoke(map) // Updating member property
+    this.onUpdateCallbacks.forEach { it.invoke(operation) }
+    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == prop.name) entry.value.forEach { it.invoke(operation) } }
+}
+
 abstract class Operation<DATA : Validatable>
 
 class SetOperation<DATA : Validatable>(
@@ -54,6 +79,12 @@ class SetOperation<DATA : Validatable>(
 class UpdateListOperation<DATA : Validatable, LIST_TYPE : Validatable>(
     val prop: KProperty1<*, *>,
     val newValue: List<LIST_TYPE>,
+    val origin: DATA
+) : Operation<DATA>()
+
+class UpdateMapOperation<DATA : Validatable, MAP_KEY, MAP_VALUE : Validatable>(
+    val prop: KProperty1<*, *>,
+    val newValue: Map<MAP_KEY, MAP_VALUE>,
     val origin: DATA
 ) : Operation<DATA>()
 
