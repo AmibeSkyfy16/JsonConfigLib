@@ -27,7 +27,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.5")
 
     testImplementation("ch.qos.logback:logback-classic:1.4.5")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.22")
 }
 
 tasks {
