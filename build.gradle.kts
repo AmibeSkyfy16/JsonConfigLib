@@ -1,10 +1,9 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.archivesName
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.7.10"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10"
+    id("org.jetbrains.kotlin.jvm") version "1.7.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.22"
     id("java-library")
     `maven-publish`
     idea
@@ -21,13 +20,13 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.22")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
-    implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
-    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
+    implementation("org.slf4j:slf4j-api:2.0.5")
 
-    testImplementation("ch.qos.logback:logback-classic:1.3.0-beta0")
+    testImplementation("ch.qos.logback:logback-classic:1.4.5")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
 }
 
@@ -86,13 +85,13 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = project.group.toString()
-            artifactId = archivesName
+            artifactId = project.base.archivesName.get()
             version = project.version.toString()
 
             from(components["java"])
 
             pom {
-                name.set(archivesName)
+                name.set(project.base.archivesName.get())
                 description.set("a tiny json config library used for minecraft mod dev")
 
                 licenses {
