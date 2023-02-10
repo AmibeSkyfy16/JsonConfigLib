@@ -174,8 +174,9 @@ data class ConfigData<DATA : Validatable>(
 
         inline fun <reified DATA : Validatable> invokeImpl(serializableData: DATA, relativePath: Path, automaticallySave: Boolean): ConfigData<DATA> {
             val onUpdateCallbacks = mutableListOf<(Operation<DATA>) -> Unit>()
-            if (automaticallySave) onUpdateCallbacks.add { ConfigManager.save(serializableData, relativePath) }
-            return ConfigData(serializableData, relativePath, onUpdateCallbacks)
+            val configData = ConfigData(serializableData, relativePath, onUpdateCallbacks)
+            if (automaticallySave) onUpdateCallbacks.add { ConfigManager.save(configData.serializableData, configData.relativePath)}
+            return configData
         }
     }
 
