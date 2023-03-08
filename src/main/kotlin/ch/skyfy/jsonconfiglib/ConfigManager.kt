@@ -78,6 +78,32 @@ object ConfigManager {
     }
 
     /**
+     * This method try to deserialize a JSON file to an object of type [DATA].
+     * If the JSON file is not found, a new object will be created provided by the type [DATA] and his default assigned value
+     * and a new JSON file will be created.
+     *
+     * If the JSON file does not match the JSON standard or your specific implementation that you override in your data classes,
+     * a [RuntimeException] will be thrown
+     *
+     * @param file A [Path] object representing where the configuration file is located
+     * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
+     * @return An object of type [DATA] that represent the configuration
+     */
+    inline fun <reified DATA> getOrCreateConfigSpecial(
+        file: Path,
+        json: Json = ConfigManager.json,
+    ): DATA where DATA : Validatable {
+        try {
+            val d: DATA = if (file.exists()) get(file, json, true)
+            else save(DATA::class.createInstance(), file, json)
+            d.confirmValidate(shouldThrowRuntimeException = true)
+            return d
+        } catch (e: java.lang.Exception) {
+            throw RuntimeException(e)
+        }
+    }
+
+    /**
      * This method try to deserialize a JSON file to an object of type [DATA]
      * But this time, if the JSON file is not found, the object will be created from another
      * JSON file (a default JSON, stored inside the jar (in resources folder))
