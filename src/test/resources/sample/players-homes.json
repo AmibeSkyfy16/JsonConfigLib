@@ -1,0 +1,20 @@
+{
+    "players": [
+        {
+            "homes": [
+                {
+                    "x": 100,
+                    "y": 100,
+                    "z": 100,
+                    "pitch": 0.0,
+                    "yaw": 0.0,
+                    "name": "secret base"
+                }
+            ],
+            "uuid": "ebb5c153-3f6f-4fb6-9062-20ac564e7490",
+            "maxHomes": 5,
+            "cooldown": 3,
+            "standStill": 0
+        }
+    ]
+}

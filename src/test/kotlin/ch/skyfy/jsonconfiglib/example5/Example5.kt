@@ -58,18 +58,18 @@ class Example5 {
         // or
         configData.updateMutableCollection<AConfig, String, MutableList<String>>(AConfig::mutableList) { it.add("Size is three now") }
 
-        configData.updateNestedMutableCollection(BB::mutableList,serializableData.b.bb, serializableData.b.bb.mutableList) { it.add("Hello buddies") }
+        configData.updateNestedMutableCollection(BB::mutableList,serializableData.b.bb) { it.add("Hello buddies") }
         // or
-        configData.updateNestedMutableCollection<AConfig, BB, String, MutableList<String>>(BB::mutableList,serializableData.b.bb, serializableData.b.bb.mutableList) { it.add("Hello buddies") }
+        configData.updateNestedMutableCollection<AConfig, BB, String, MutableList<String>>(BB::mutableList,serializableData.b.bb) { it.add("Hello buddies") }
 
 
         configData.updateMap(AConfig::bMap) { it["z"] = B.createDefault() }
         // or
         configData.updateMap<AConfig, String, B, MutableMap<String, B>>(AConfig::bMap) { it["zz"] = B.createDefault() }
 
-        configData.updateMapNested(BB::mutableMap, serializableData.b.bb, serializableData.b.bb.mutableMap) { it["bwah-bwah"] = "bwah" }
+        configData.updateMapNested(BB::mutableMap, serializableData.b.bb) { it["bwah-bwah"] = "bwah" }
         // or
-        configData.updateMapNested<AConfig, BB, String, String, MutableMap<String, String>>(BB::mutableMap,serializableData.b.bb, serializableData.b.bb.mutableMap) { it["bwah-bwah"] = "bwah" }
+        configData.updateMapNested<AConfig, BB, String, String, MutableMap<String, String>>(BB::mutableMap,serializableData.b.bb) { it["bwah-bwah"] = "bwah" }
 
 
     }

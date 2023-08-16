@@ -39,7 +39,7 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
 /**
  * @see updateMapNested
  */
-inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : MutableMap<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(kProperty1: KProperty1<DATA, MAP>, crossinline block: (MAP) -> Unit) = updateMapNested(kProperty1, serializableData, kProperty1.get(serializableData), block)
+inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : MutableMap<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(kProperty1: KProperty1<DATA, MAP>, crossinline block: (MAP) -> Unit) = updateMapNested(kProperty1, serializableData, block)
 
 /**
  * Update the [map] for the specified [kProperty1]
@@ -47,10 +47,10 @@ inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reif
  * Also call registered callbacks, the global registered callbacks and specific registered callback if needed
  *
  * @param kProperty1 A [KProperty1] use to identify on which property the update must be done
- * @param map An object of type [MAP] on which the update will be done
  * @param block A block of code use to update the [map] (put, compute, remove, etc.)
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : MutableMap<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(kProperty1: KProperty1<NESTED_DATA, MAP>, receiver: NESTED_DATA, map: MAP, crossinline block: (MAP) -> Unit) {
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : MutableMap<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(kProperty1: KProperty1<NESTED_DATA, MAP>, receiver: NESTED_DATA, crossinline block: (MAP) -> Unit) {
+    val map = kProperty1.get(receiver)
     val oldValue = map.toMutableMap()
     val operation = UpdateMutableMapOperation(kProperty1, receiver, oldValue, map, serializableData)
 
@@ -69,23 +69,24 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
 /**
  * @see updateNestedMutableCollection
  */
-inline fun <reified DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateMutableCollection(kProperty1: KProperty1<DATA, MUTABLE_COLLECTION>, crossinline block: (MUTABLE_COLLECTION) -> Unit) = updateNestedMutableCollection(kProperty1, serializableData, kProperty1.get(serializableData), block)
+inline fun <reified DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateMutableCollection(kProperty1: KProperty1<DATA, MUTABLE_COLLECTION>, crossinline block: (MUTABLE_COLLECTION) -> Unit) = updateNestedMutableCollection(kProperty1, serializableData, block)
 
 /**
- * Update the [mutableCollection] (a MutableMap or a MutableSet) for the specified [kProperty1]
+ * Update the [MUTABLE_COLLECTION] (a MutableMap or a MutableSet) for the specified [kProperty1]
  *
  * Also call registered callbacks, the global registered callbacks and specific registered callback if needed
  *
  * @param kProperty1 A [KProperty1] use to identify on which property the update must be done
- * @param mutableCollection An object of type [MUTABLE_COLLECTION] on which the update will be done
- * @param block A block of code use to update the [mutableCollection] (add, remove)
+// * @param mutableCollection An object of type [MUTABLE_COLLECTION] on which the update will be done
+ * @param block A block of code use to update the [MUTABLE_COLLECTION] (add, remove)
  */
 inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateNestedMutableCollection(
     kProperty1: KProperty1<NESTED_DATA, MUTABLE_COLLECTION>,
     receiver: NESTED_DATA,
-    mutableCollection: MUTABLE_COLLECTION,
     crossinline block: (MUTABLE_COLLECTION) -> Unit
 ) {
+    val mutableCollection = kProperty1.get(receiver)
+
     val oldValue = if (mutableCollection is MutableSet<*>) mutableCollection.toMutableSet() else mutableCollection.toMutableList()
     val operation = UpdateMutableCollectionOperation(kProperty1, receiver, oldValue, mutableCollection, serializableData)
 

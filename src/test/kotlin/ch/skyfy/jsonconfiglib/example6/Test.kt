@@ -2,7 +2,6 @@ package ch.skyfy.jsonconfiglib.example6
 
 import ch.skyfy.jsonconfiglib.ConfigData
 import ch.skyfy.jsonconfiglib.Validatable
-import ch.skyfy.jsonconfiglib.Validatable3
 import kotlinx.serialization.Serializable
 import java.nio.file.Paths
 
