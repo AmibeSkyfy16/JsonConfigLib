@@ -42,7 +42,7 @@ object ConfigManager {
      */
     inline fun <reified DATA : Validatable> reloadConfig(configData: ConfigData<DATA>): Boolean {
         try {
-            configData.serializableData = get(configData.relativePath, shouldThrowRuntimeException = false)
+            configData.serializableData = get(configData.relativePath)
         } catch (e: Exception) {
             e.printStackTrace()
             LOGGER.error("The configuration cannot be reloaded due to errors")
@@ -67,40 +67,9 @@ object ConfigManager {
         file: Path,
         json: Json = ConfigManager.json,
     ): DATA {
-        try {
-            val d: DATA = if (file.exists()) get(file, json, true)
-            else save(DEFAULT::class.createInstance().getDefault(), file, json)
-            d.confirmValidate(shouldThrowRuntimeException = true)
-            return d
-        } catch (e: java.lang.Exception) {
-            throw RuntimeException(e)
-        }
-    }
-
-    /**
-     * This method try to deserialize a JSON file to an object of type [DATA].
-     * If the JSON file is not found, a new object will be created provided by the type [DATA] and his default assigned value
-     * and a new JSON file will be created.
-     *
-     * If the JSON file does not match the JSON standard or your specific implementation that you override in your data classes,
-     * a [RuntimeException] will be thrown
-     *
-     * @param file A [Path] object representing where the configuration file is located
-     * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
-     * @return An object of type [DATA] that represent the configuration
-     */
-    inline fun <reified DATA> getOrCreateConfigSpecial(
-        file: Path,
-        json: Json = ConfigManager.json,
-    ): DATA where DATA : Validatable {
-        try {
-            val d: DATA = if (file.exists()) get(file, json, true)
-            else save(DATA::class.createInstance(), file, json)
-            d.confirmValidate(shouldThrowRuntimeException = true)
-            return d
-        } catch (e: java.lang.Exception) {
-            throw RuntimeException(e)
-        }
+        //            d.confirmValidateRec<DATA>(shouldThrowRuntimeException = true)
+        return if (file.exists()) get(file, json)
+        else save(DEFAULT::class.createInstance().getDefault(), file, json)
     }
 
     /**
@@ -121,12 +90,30 @@ object ConfigManager {
         defaultFile: String,
         json: Json = ConfigManager.json,
     ): DATA {
-        try {
-            return if (file.exists()) get(file, json, true)
-            else get(extractResource(file, defaultFile, DATA::class.java.classLoader), json, true)
-        } catch (e: java.lang.Exception) {
-            throw RuntimeException(e)
-        }
+        //            d.confirmValidateRec<DATA>(shouldThrowRuntimeException = true)
+        return if (file.exists()) get(file, json)
+        else get(extractResource(file, defaultFile, DATA::class.java.classLoader), json)
+    }
+
+    /**
+     * This method try to deserialize a JSON file to an object of type [DATA].
+     * If the JSON file is not found, a new object will be created provided by the type [DATA] and his default assigned value
+     * and a new JSON file will be created.
+     *
+     * If the JSON file does not match the JSON standard or your specific implementation that you override in your data classes,
+     * a [RuntimeException] will be thrown
+     *
+     * @param file A [Path] object representing where the configuration file is located
+     * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
+     * @return An object of type [DATA] that represent the configuration
+     */
+    inline fun <reified DATA> getOrCreateConfigSpecial(
+        file: Path,
+        json: Json = ConfigManager.json,
+    ): DATA where DATA : Validatable {
+        //            d.confirmValidateRec(kClass = DATA::class)
+        return if (file.exists()) get(file, json)
+        else save(DATA::class.createInstance(), file, json)
     }
 
     /**
@@ -134,15 +121,22 @@ object ConfigManager {
      *
      * @param file A [Path] object representing where the configuration file is located
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
-     * @param shouldThrowRuntimeException A [Boolean] object which specifies whether to throw a [RuntimeException] if the configuration is considered as invalid
      * @return An object of type [DATA] that represent the configuration
      */
     @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> get(file: Path, json: Json = ConfigManager.json, shouldThrowRuntimeException: Boolean): DATA {
-        val `data`: DATA = json.decodeFromStream(file.inputStream())
-        if (!`data`.confirmValidate(shouldThrowRuntimeException = shouldThrowRuntimeException)) throw Exception("The json file is not valid !!!")
-        return `data`
+    inline fun <reified DATA : Validatable> get(file: Path, json: Json = ConfigManager.json): DATA {
+        return json.decodeFromStream<DATA>(file.inputStream())
     }
+
+    /**
+     * Try to save a configuration object representing by an object of type [DATA]
+     *
+     * This fun will generally be used by the developer later in the code when data has been modified and needs to be saved
+     *
+     * @param configData A [ConfigData] object that represent a configuration
+     * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
+     */
+    inline fun <reified DATA : Validatable> save(configData: ConfigData<DATA>, json: Json = ConfigManager.json) = save(configData.serializableData, configData.relativePath, json)
 
     /**
      * Try to save a configuration object representing by an object of type [DATA]
@@ -155,43 +149,13 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      * @return An object of type [DATA] that represent the configuration
      */
-    @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
-        config: DATA,
-        file: Path,
-        json: Json = ConfigManager.json,
-    ): DATA {
-        config.confirmValidate(mutableListOf(), true)
+    inline fun <reified DATA : Validatable> save(config: DATA, file: Path, json: Json = ConfigManager.json): DATA {
         file.parent.createDirectories()
         json.encodeToStream(config, file.outputStream())
         return config
     }
 
-    /**
-     * Try to save a configuration object representing by an object of type [DATA]
-     *
-     * This fun will generally be used by the developer later in the code when data has been modified and needs to be saved
-     *
-     * @param configData A [ConfigData] object that represent a configuration
-     * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
-     */
-    @Throws(Exception::class)
-    inline fun <reified DATA : Validatable> save(
-        configData: ConfigData<DATA>,
-        json: Json = ConfigManager.json,
-    ) {
-        if (!configData.serializableData.confirmValidate(mutableListOf(), false)) {
-            LOGGER.warn("The data you tried to save has not been saved, because something is not valid")
-            return
-        }
-        json.encodeToStream(configData.serializableData, configData.relativePath.outputStream())
-    }
-
-    inline fun <reified DATA : Validatable> computeAndSave(
-        configData: ConfigData<DATA>,
-        block: (DATA) -> Unit,
-        json: Json = ConfigManager.json,
-    ) {
+    inline fun <reified DATA : Validatable> computeAndSave(configData: ConfigData<DATA>, block: (DATA) -> Unit, json: Json = ConfigManager.json) {
         block.invoke(configData.serializableData)
         save(configData, json)
     }

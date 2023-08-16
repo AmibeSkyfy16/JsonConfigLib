@@ -11,4 +11,4 @@ data class Home(
     var pitch: Float,
     var yaw: Float,
     var name: String
-) : Validatable
+) : Validatable()

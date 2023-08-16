@@ -10,7 +10,7 @@ data class Player(
     var maxHomes: Int = 3,
     var cooldown: Int = 15,
     var standStill: Int = 5
-) : Validatable {
+) : Validatable() {
 
     override fun validateImpl(errors: MutableList<String>) {
         homes.forEach { it.validateImpl(errors) }

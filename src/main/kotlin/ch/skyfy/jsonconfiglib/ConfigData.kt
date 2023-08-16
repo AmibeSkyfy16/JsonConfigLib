@@ -22,17 +22,24 @@ inline fun <reified DATA : Validatable, reified TYPE> ConfigData<DATA>.update(kM
  * @param newValue An object of type [TYPE] which will be used as the new value
  */
 inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified TYPE> ConfigData<DATA>.updateNested(kMutableProperty1: KMutableProperty1<NESTED_DATA, TYPE>, receiver: NESTED_DATA, newValue: TYPE) {
-    val operation = SetOperation(kMutableProperty1, receiver, kMutableProperty1.get(receiver), newValue, serializableData)
+    val oldValue = kMutableProperty1.get(receiver)
+    val operation = SetOperation(kMutableProperty1, receiver, oldValue, newValue, serializableData)
+
     kMutableProperty1.set(receiver, newValue)
+
+    if (!receiver.confirmValidate(operation = operation, shouldThrowRuntimeException = false)) {
+        kMutableProperty1.set(receiver, oldValue)
+        return
+    }
+
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kMutableProperty1.name) entry.value.forEach { it.invoke(operation) } }
 }
 
-
 /**
  * @see updateMapNested
  */
-inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(kProperty1: KProperty1<DATA, MAP>, crossinline block: (MAP) -> Unit) = updateMapNested(kProperty1, kProperty1.get(serializableData), block)
+inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : MutableMap<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMap(kProperty1: KProperty1<DATA, MAP>, crossinline block: (MAP) -> Unit) = updateMapNested(kProperty1, serializableData, kProperty1.get(serializableData), block)
 
 /**
  * Update the [map] for the specified [kProperty1]
@@ -43,81 +50,88 @@ inline fun <reified DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reif
  * @param map An object of type [MAP] on which the update will be done
  * @param block A block of code use to update the [map] (put, compute, remove, etc.)
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified MAP_KEY, reified MAP_VALUE, reified MAP : Map<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(kProperty1: KProperty1<NESTED_DATA, MAP>, map: MAP, crossinline block: (MAP) -> Unit) {
-    // TODO make a deep copy for map, so we can add oldValue
-    val operation = UpdateMapOperation(kProperty1, map, serializableData)
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MAP_KEY, reified MAP_VALUE, reified MAP : MutableMap<MAP_KEY, MAP_VALUE>> ConfigData<DATA>.updateMapNested(kProperty1: KProperty1<NESTED_DATA, MAP>, receiver: NESTED_DATA, map: MAP, crossinline block: (MAP) -> Unit) {
+    val oldValue = map.toMutableMap()
+    val operation = UpdateMutableMapOperation(kProperty1, receiver, oldValue, map, serializableData)
+
     block.invoke(map)
+
+    if (!receiver.confirmValidate(operation = operation, shouldThrowRuntimeException = false)) {
+        map.clear()
+        map.putAll(oldValue)
+        return
+    }
+
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kProperty1.name) entry.value.forEach { it.invoke(operation) } }
 }
 
-
 /**
- * @see updateIterableNested
+ * @see updateNestedMutableCollection
  */
-inline fun <reified DATA : Validatable, reified ITERABLE_TYPE, reified ITERABLE : Iterable<ITERABLE_TYPE>> ConfigData<DATA>.updateIterable(kProperty1: KProperty1<DATA, ITERABLE>, crossinline block: (ITERABLE) -> Unit) = updateIterableNested(kProperty1, kProperty1.get(serializableData), block)
+inline fun <reified DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateMutableCollection(kProperty1: KProperty1<DATA, MUTABLE_COLLECTION>, crossinline block: (MUTABLE_COLLECTION) -> Unit) = updateNestedMutableCollection(kProperty1, serializableData, kProperty1.get(serializableData), block)
 
 /**
- * Update the [iterable] for the specified [kProperty1]
+ * Update the [mutableCollection] (a MutableMap or a MutableSet) for the specified [kProperty1]
  *
  * Also call registered callbacks, the global registered callbacks and specific registered callback if needed
  *
  * @param kProperty1 A [KProperty1] use to identify on which property the update must be done
- * @param iterable An object of type [ITERABLE] on which the update will be done
- * @param block A block of code use to update the [iterable] (add, remove)
+ * @param mutableCollection An object of type [MUTABLE_COLLECTION] on which the update will be done
+ * @param block A block of code use to update the [mutableCollection] (add, remove)
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified ITERABLE_TYPE, reified ITERABLE : Iterable<ITERABLE_TYPE>> ConfigData<DATA>.updateIterableNested(kProperty1: KProperty1<NESTED_DATA, ITERABLE>, iterable: ITERABLE, crossinline block: (ITERABLE) -> Unit) {
-    // TODO make a deep copy for iterable, so we can add oldValue
-    val operation = UpdateIterableOperation(kProperty1, iterable, serializableData)
-    block.invoke(iterable)
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateNestedMutableCollection(
+    kProperty1: KProperty1<NESTED_DATA, MUTABLE_COLLECTION>,
+    receiver: NESTED_DATA,
+    mutableCollection: MUTABLE_COLLECTION,
+    crossinline block: (MUTABLE_COLLECTION) -> Unit
+) {
+    val oldValue = if (mutableCollection is MutableSet<*>) mutableCollection.toMutableSet() else mutableCollection.toMutableList()
+    val operation = UpdateMutableCollectionOperation(kProperty1, receiver, oldValue, mutableCollection, serializableData)
+
+    block.invoke(mutableCollection)
+
+    if (!receiver.confirmValidate(operation = operation, shouldThrowRuntimeException = false)) {
+        mutableCollection.clear()
+        mutableCollection.addAll(oldValue)
+        return
+    }
+
     this.onUpdateCallbacks.forEach { it.invoke(operation) }
     this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kProperty1.name) entry.value.forEach { it.invoke(operation) } }
 }
 
-
-/**
- * @see updateCustomNested
- */
-inline fun <reified DATA : Validatable, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustom(kProperty1: KProperty1<DATA, CUSTOM_TYPE>, customObject: CUSTOM_TYPE, crossinline block: (CUSTOM_TYPE) -> Unit) = updateCustomNested(kProperty1, customObject, block)
-
-/**
- * Use only this fun in the case of the others one like [updateNested], [updateIterable] don't work
- */
-inline fun <reified DATA : Validatable, reified NESTED_DATA, reified CUSTOM_TYPE> ConfigData<DATA>.updateCustomNested(kProperty1: KProperty1<NESTED_DATA, CUSTOM_TYPE>, custom: CUSTOM_TYPE, crossinline block: (CUSTOM_TYPE) -> Unit) {
-    // TODO make a deep copy for map, so we can add oldValue
-    val operation = UpdateCustomOperation(kProperty1, custom, serializableData)
-    block.invoke(custom)
-    this.onUpdateCallbacks.forEach { it.invoke(operation) }
-    this.onUpdateCallbacksMap.forEach { entry -> if (entry.key.name == kProperty1.name) entry.value.forEach { it.invoke(operation) } }
+abstract class Operation<DATA : Validatable, NESTED_DATA : Validatable> {
+    abstract val prop: KProperty1<*, *>
+    abstract val receiver: NESTED_DATA
+    abstract val oldValue: Any?
+    abstract val newValue: Any?
+    abstract val origin: DATA
 }
-
-abstract class Operation<DATA : Validatable>
 
 class SetOperation<DATA : Validatable, NESTED_DATA : Validatable>(
-    val prop: KMutableProperty1<*, *>,
-    val receiver: NESTED_DATA,
-    val oldValue: Any?,
-    val newValue: Any?,
-    val origin: DATA
-) : Operation<DATA>()
+    override val prop: KMutableProperty1<*, *>,
+    override val receiver: NESTED_DATA,
+    override val oldValue: Any?,
+    override val newValue: Any?,
+    override val origin: DATA
+) : Operation<DATA, NESTED_DATA>()
 
-class UpdateIterableOperation<DATA : Validatable, ITERABLE_TYPE>(
-    val prop: KProperty1<*, *>,
-    val newValue: Iterable<ITERABLE_TYPE>,
-    val origin: DATA
-) : Operation<DATA>()
+class UpdateMutableCollectionOperation<DATA : Validatable, NESTED_DATA : Validatable, MUTABLE_COLLECTION_TYPE>(
+    override val prop: KProperty1<*, *>,
+    override val receiver: NESTED_DATA,
+    override val oldValue: MutableCollection<MUTABLE_COLLECTION_TYPE>,
+    override val newValue: MutableCollection<MUTABLE_COLLECTION_TYPE>,
+    override val origin: DATA
+) : Operation<DATA, NESTED_DATA>()
 
-class UpdateMapOperation<DATA : Validatable, MAP_KEY, MAP_VALUE>(
-    val prop: KProperty1<*, *>,
-    val newValue: Map<MAP_KEY, MAP_VALUE>,
-    val origin: DATA
-) : Operation<DATA>()
-
-class UpdateCustomOperation<DATA : Validatable, CUSTOM_TYPE>(
-    val prop: KProperty1<*, *>,
-    val newValue: CUSTOM_TYPE,
-    val origin: DATA
-) : Operation<DATA>()
+class UpdateMutableMapOperation<DATA : Validatable, NESTED_DATA : Validatable, MAP_KEY, MAP_VALUE>(
+    override val prop: KProperty1<*, *>,
+    override val receiver: NESTED_DATA,
+    override val oldValue: MutableMap<MAP_KEY, MAP_VALUE>,
+    override val newValue: MutableMap<MAP_KEY, MAP_VALUE>,
+    override val origin: DATA
+) : Operation<DATA, NESTED_DATA>()
 
 /**
  * A serializable data class representing a specific configuration
@@ -132,7 +146,7 @@ class UpdateCustomOperation<DATA : Validatable, CUSTOM_TYPE>(
 data class ConfigData<DATA : Validatable>(
     private var _serializableData: DATA,
     val relativePath: Path,
-    val onUpdateCallbacks: MutableList<(Operation<DATA>) -> Unit>
+    val onUpdateCallbacks: MutableList<(Operation<DATA, *>) -> Unit>
 ) {
 
     var serializableData by Delegates.observable(_serializableData) { _, _, newValue ->
@@ -140,9 +154,9 @@ data class ConfigData<DATA : Validatable>(
         onReloadCallbacks.forEach { it.invoke(_serializableData) }
     }
 
-    val onUpdateCallbacksMap = mutableMapOf<KMutableProperty1<*, *>, MutableList<(Operation<DATA>) -> Unit>>()
+    val onUpdateCallbacksMap = mutableMapOf<KMutableProperty1<*, *>, MutableList<(Operation<DATA, *>) -> Unit>>()
 
-    private var onReloadCallbacks: MutableList<(DATA) -> Unit> = mutableListOf()
+    private val onReloadCallbacks: MutableList<(DATA) -> Unit> = mutableListOf()
 
     /**
      * Allow user to add a block of code that will be called every time a DATA is reloaded from a file
@@ -152,7 +166,7 @@ data class ConfigData<DATA : Validatable>(
     /**
      * Allow user to add a block of code that will be called every time the specified member property is set
      */
-    fun registerOnUpdateOn(prop: KMutableProperty1<*, *>, callback: (Operation<DATA>) -> Unit) {
+    fun registerOnUpdateOn(prop: KMutableProperty1<*, *>, callback: (Operation<DATA, *>) -> Unit) {
         this.onUpdateCallbacksMap.compute(prop) { _, value ->
             return@compute if (value == null) mutableListOf(callback) else {
                 value.add(callback); value
@@ -163,25 +177,22 @@ data class ConfigData<DATA : Validatable>(
     /**
      * Allow user to add a block of code that will be called every time a member property of [DATA] is set
      */
-    fun registerOnUpdate(callback: (Operation<DATA>) -> Unit) = onUpdateCallbacks.add(callback)
+    fun registerOnUpdate(callback: (Operation<DATA, *>) -> Unit) = onUpdateCallbacks.add(callback)
 
     companion object {
-        inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativePath: Path, automaticallySave: Boolean) =
-            invokeImpl(ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativePath), relativePath, automaticallySave)
+        inline operator fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> invoke(relativePath: Path, automaticallySave: Boolean) = invokeImpl(ConfigManager.getOrCreateConfig<DATA, DEFAULT>(relativePath), relativePath, automaticallySave)
 
-        inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String, automaticallySave: Boolean) =
-            invokeImpl(ConfigManager.getOrCreateConfig<DATA>(relativeFilePath, defaultFile), relativeFilePath, automaticallySave)
+        inline operator fun <reified DATA : Validatable> invoke(relativeFilePath: Path, defaultFile: String, automaticallySave: Boolean) = invokeImpl(ConfigManager.getOrCreateConfig<DATA>(relativeFilePath, defaultFile), relativeFilePath, automaticallySave)
 
         /**
          * Use [DATA] default assigned values to create the default object
          */
-        inline fun <reified DATA> invokeSpecial(relativePath: Path, automaticallySave: Boolean) where DATA : Validatable =
-            invokeImpl(ConfigManager.getOrCreateConfigSpecial<DATA>(relativePath), relativePath, automaticallySave)
+        inline fun <reified DATA> invokeSpecial(relativePath: Path, automaticallySave: Boolean) where DATA : Validatable = invokeImpl(ConfigManager.getOrCreateConfigSpecial<DATA>(relativePath), relativePath, automaticallySave)
 
         inline fun <reified DATA : Validatable> invokeImpl(serializableData: DATA, relativePath: Path, automaticallySave: Boolean): ConfigData<DATA> {
-            val onUpdateCallbacks = mutableListOf<(Operation<DATA>) -> Unit>()
+            val onUpdateCallbacks = mutableListOf<(Operation<DATA, *>) -> Unit>()
             val configData = ConfigData(serializableData, relativePath, onUpdateCallbacks)
-            if (automaticallySave) onUpdateCallbacks.add { ConfigManager.save(configData.serializableData, configData.relativePath)}
+            if (automaticallySave) onUpdateCallbacks.add { ConfigManager.save(configData.serializableData, configData.relativePath) }
             return configData
         }
     }

@@ -12,7 +12,7 @@ data class AConfig(
     var mutableList: MutableList<String>,
     var map: MutableMap<String, Float>,
     var bMap: MutableMap<String, B>
-) : Validatable
+) : Validatable()
 
 @Serializable
 data class B(
@@ -22,7 +22,7 @@ data class B(
     val mutableSet: MutableSet<String>,
     val mutableList: MutableList<String>,
     val mutableMap: MutableMap<String, String>
-) : Validatable {
+) : Validatable() {
     companion object {
         fun createDefault(): B {
             return B(
@@ -54,7 +54,7 @@ data class BB(
     val mutableMap: MutableMap<String, String>,
     val set: Set<String>,
     val mutableSet: MutableSet<String>
-) : Validatable {
+) : Validatable() {
     companion object {
         fun createDefault(): BB {
             return BB(
@@ -73,7 +73,7 @@ data class BB(
 @Serializable
 data class BBB(
     val iAmBBB: String
-) : Validatable
+) : Validatable()
 
 @Suppress("unused")
 class DefaultAConfig : Defaultable<AConfig> {

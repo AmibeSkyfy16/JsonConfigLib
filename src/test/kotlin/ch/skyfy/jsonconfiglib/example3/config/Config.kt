@@ -8,7 +8,7 @@ data class Config(
     val dayOfAuthorizationOfThePvP: Int,
     val dayOfAuthorizationOfTheEntryInTheNether: Int,
     val allowEnderPearlAssault: Boolean
-) : Validatable
+) : Validatable()
 
 @Suppress("unused")
 class DefaultConfig : Defaultable<Config> {

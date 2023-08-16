@@ -8,7 +8,7 @@ data class Database(
     var port: Int,
     var url: String,
     var map: MutableMap<String, Float>
-) : Validatable {
+) : Validatable() {
     override fun validateImpl(errors: MutableList<String>) {
         if(port != 3306 && port != 3307)
             errors.add("Port doesn't follow the rule")

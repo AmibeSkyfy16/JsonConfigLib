@@ -3,8 +3,16 @@
 package ch.skyfy.jsonconfiglib
 
 import ch.skyfy.jsonconfiglib.ConfigManager.LOGGER
+import kotlin.properties.Delegates
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.isSubtypeOf
 
-interface Validatable : Cloneable{
+abstract class Validatable : Cloneable {
+
 
     /**
      * A typo or a mistake can happen quickly.
@@ -13,7 +21,7 @@ interface Validatable : Cloneable{
      *
      * @param errors A [MutableList] object representing a list of errors
      */
-    fun validateImpl(errors: MutableList<String>){}
+    open fun validateImpl(errors: MutableList<String>) {}
 
     /**
      * call [validateImpl] fun and will log in the console every error found
@@ -22,14 +30,51 @@ interface Validatable : Cloneable{
      * @param shouldThrowRuntimeException A [Boolean] object that will throw a [RuntimeException] if it's true and at least one error is found
      * @return true if it's valid, false otherwise
      */
-    fun confirmValidate(errors: MutableList<String> = mutableListOf(), shouldThrowRuntimeException: Boolean) : Boolean {
+    fun <DATA : Validatable> confirmValidate(errors: MutableList<String> = mutableListOf(), operation: Operation<DATA, *>? = null, shouldThrowRuntimeException: Boolean = false): Boolean {
         validateImpl(errors)
+
         return if (errors.size != 0) {
-            LOGGER.error("Some json file are not valid")
+
+            if (operation != null) {
+                val message = """
+                    La modification sur la propriété ${operation.prop.toString()} présent dans la classe
+                    ${operation.receiver!!::class.qualifiedName} n'est pas considéré comme valide !
+                    Peut-être que le nom que vous avez modifié n'est pas autorisé, ou que le numéro est trop grand ou trop petit,
+                    ou encore que l'ajout ou la suppression d'une donné, n'est pas autorisé.
+                """.trimIndent()
+                LOGGER.error(message)
+            } else {
+                LOGGER.error("Config ${this::class.qualifiedName} has just been modified and the new data is not considered valid")
+            }
+
             errors.forEach(LOGGER::error)
-            if (shouldThrowRuntimeException) throw RuntimeException()
+
+            if (shouldThrowRuntimeException) throw RuntimeException("Oh oh oh ! Some issues with JSON configuration files got caught !")
             else false
-        }else true
+
+        } else true
     }
 
+    /**
+     * Use this fun inside the init block of your data class.
+     * It will call the validateImpl fun that you implemented just below.
+     * If the config is not valid, a runtime exception will be thrown
+     */
+    fun confirmValidation(){
+        confirmValidate<Validatable>(shouldThrowRuntimeException = true)
+    }
+
+    @Suppress("UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
+    private fun <DATA : Validatable> confirmValidateRec(kClass: KClass<DATA>) {
+        confirmValidate<Validatable>(shouldThrowRuntimeException = true)
+
+        kClass.declaredMemberProperties.forEach {
+            if (it.returnType.isSubtypeOf(Validatable::class.createType())) {
+                if (this::class.isSubclassOf(Validatable::class)) {
+                    val p = it.get(this as DATA) as Validatable
+                    p.confirmValidateRec(kClass = p::class)
+                }
+            }
+        }
+    }
 }

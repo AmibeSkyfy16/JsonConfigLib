@@ -33,7 +33,7 @@ class Example2 {
                 println("Updating sideboard...")
                 println("Updating game...")
                 println()
-            }else if(operation is UpdateIterableOperation<PlayersHomesConfig, *>){
+            }else if(operation is UpdateMutableCollectionOperation<PlayersHomesConfig, *, *>){
                 val kMutableProperty1 = operation.prop
                 val newValue = operation.newValue
                 val playersHomesConfig = operation.origin
@@ -66,7 +66,7 @@ class Example2 {
         val configData = Configs.PLAYERS_HOMES
         val playersHomesConfig = configData.serializableData
 
-        configData.updateIterableNested<PlayersHomesConfig, PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players, playersHomesConfig.players) {
+        configData.updateNestedMutableCollection<PlayersHomesConfig, PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players,playersHomesConfig, playersHomesConfig.players) {
             it.add(
                 Player(
                     mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
@@ -84,7 +84,7 @@ class Example2 {
             )
         }
         //or
-        configData.updateIterable<PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players) {
+        configData.updateMutableCollection<PlayersHomesConfig,Player, MutableList<Player>>(PlayersHomesConfig::players) {
             it.add(
                 Player(
                     mutableListOf(Home(100, 100, 100, 0.0f, 0.0f, "secret base")),
@@ -94,7 +94,7 @@ class Example2 {
         }
 
 
-        configData.updateIterableNested<PlayersHomesConfig, Player, Home, MutableList<Home>>(Player::homes, playersHomesConfig.players.first().homes){
+        configData.updateNestedMutableCollection<PlayersHomesConfig, Player, Home, MutableList<Home>>(Player::homes,playersHomesConfig.players.first(), playersHomesConfig.players.first().homes){
             for(i in 0..10){
                 it.add(Home(100, 100, 100, 0.0f, 0.0f, "secret base"))
             }
