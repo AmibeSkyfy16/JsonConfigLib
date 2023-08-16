@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package ch.skyfy.jsonconfiglib
 
 import ch.skyfy.jsonconfiglib.ConfigManager.LOGGER
@@ -70,14 +68,6 @@ abstract class Validatable : Cloneable {
     }
 
     /**
-     * Use this fun inside the init block of your data class.
-     * It will call the [validateImpl] fun that you implemented just below.
-     * If the config is not valid, a runtime exception will be thrown
-     */
-    fun startValidation(shouldThrowRuntimeException: Boolean = true) = validate<Validatable>(shouldThrowRuntimeException = shouldThrowRuntimeException)
-
-
-    /**
      * you can use this fun in your root data class config, the [validate] fun of every field type that extend [Validatable]
      * will be called.
      *
@@ -94,34 +84,6 @@ abstract class Validatable : Cloneable {
                     p.validateAll(kClass = p::class)
                 }
             } else {
-//                if(it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.invariant(it.returnType.classifier!!.starProjectedType))))){
-//                    println("tgg")
-//                }
-//                if(it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.invariant(it.returnType))))){
-//                    println("455")
-//                }
-//
-//                if(it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.covariant(it.returnType))))){
-//                    println("s")
-//                }
-//                if(it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.covariant(it.returnType.classifier!!.starProjectedType))))){
-//                    println("ssss")
-//                }
-//                if(it.returnType == Collection::class.createType(listOf(KTypeProjection.covariant(it.returnType.classifier!!.starProjectedType)))){
-//                    println("ssssffefdfdf")
-//                }
-
-//                ----- WORKS ----
-//                if (it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.contravariant(it.returnType))))) {
-//                    println("3444")
-//                }
-//                if(it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.contravariant(it.returnType.classifier!!.starProjectedType))))){
-//                    println("11")
-//                }
-//                ----- WORKS ----
-
-//                if(it.returnType.isSubtypeOf(Map::class.createType(mapOf(KTypeProjection.contravariant()))))
-
                 if (it.returnType.isSubtypeOf(Collection::class.createType(listOf(KTypeProjection.contravariant(it.returnType))))) {
                     it.returnType.arguments.forEach { kTypeProjection ->
                         if (kTypeProjection.type != null && kTypeProjection.type!!.isSubtypeOf(Validatable::class.createType())) {
@@ -147,4 +109,12 @@ abstract class Validatable : Cloneable {
             }
         }
     }
+
+    /**
+     * Use this fun inside the init block of your data class.
+     * It will call the [validateImpl] fun that you implemented just below.
+     * If the config is not valid, a runtime exception will be thrown
+     */
+    fun startValidation(shouldThrowRuntimeException: Boolean = true) = validate<Validatable>(shouldThrowRuntimeException = shouldThrowRuntimeException)
+
 }

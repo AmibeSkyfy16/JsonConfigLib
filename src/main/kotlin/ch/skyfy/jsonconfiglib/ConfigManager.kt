@@ -63,11 +63,7 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      * @return An object of type [DATA] that represent the configuration
      */
-    inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(
-        file: Path,
-        json: Json = ConfigManager.json,
-    ): DATA {
-        //            d.confirmValidateRec<DATA>(shouldThrowRuntimeException = true)
+    inline fun <reified DATA : Validatable, reified DEFAULT : Defaultable<DATA>> getOrCreateConfig(file: Path, json: Json = ConfigManager.json, ): DATA {
         return if (file.exists()) get(file, json)
         else save(DEFAULT::class.createInstance().getDefault(), file, json)
     }
@@ -85,12 +81,7 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      * @return An object of type [DATA] that represent the configuration
      */
-    inline fun <reified DATA : Validatable> getOrCreateConfig(
-        file: Path,
-        defaultFile: String,
-        json: Json = ConfigManager.json,
-    ): DATA {
-        //            d.confirmValidateRec<DATA>(shouldThrowRuntimeException = true)
+    inline fun <reified DATA : Validatable> getOrCreateConfig(file: Path, defaultFile: String, json: Json = ConfigManager.json, ): DATA {
         return if (file.exists()) get(file, json)
         else get(extractResource(file, defaultFile, DATA::class.java.classLoader), json)
     }
@@ -107,11 +98,7 @@ object ConfigManager {
      * @param json A [Json] object that is used to serialize and deserialize the file representing the configuration (Already has a default value and does not have to be specified)
      * @return An object of type [DATA] that represent the configuration
      */
-    inline fun <reified DATA> getOrCreateConfigSpecial(
-        file: Path,
-        json: Json = ConfigManager.json,
-    ): DATA where DATA : Validatable {
-        //            d.confirmValidateRec(kClass = DATA::class)
+    inline fun <reified DATA> getOrCreateConfigSpecial(file: Path, json: Json = ConfigManager.json, ): DATA where DATA : Validatable {
         return if (file.exists()) get(file, json)
         else save(DATA::class.createInstance(), file, json)
     }

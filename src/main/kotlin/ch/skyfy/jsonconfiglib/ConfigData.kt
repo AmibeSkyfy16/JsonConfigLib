@@ -80,11 +80,7 @@ inline fun <reified DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified
 // * @param mutableCollection An object of type [MUTABLE_COLLECTION] on which the update will be done
  * @param block A block of code use to update the [MUTABLE_COLLECTION] (add, remove)
  */
-inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateNestedMutableCollection(
-    kProperty1: KProperty1<NESTED_DATA, MUTABLE_COLLECTION>,
-    receiver: NESTED_DATA,
-    crossinline block: (MUTABLE_COLLECTION) -> Unit
-) {
+inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reified MUTABLE_COLLECTION_TYPE, reified MUTABLE_COLLECTION : MutableCollection<MUTABLE_COLLECTION_TYPE>> ConfigData<DATA>.updateNestedMutableCollection(kProperty1: KProperty1<NESTED_DATA, MUTABLE_COLLECTION>, receiver: NESTED_DATA, crossinline block: (MUTABLE_COLLECTION) -> Unit) {
     val mutableCollection = kProperty1.get(receiver)
 
     val oldValue = if (mutableCollection is MutableSet<*>) mutableCollection.toMutableSet() else mutableCollection.toMutableList()
@@ -144,11 +140,7 @@ class UpdateMutableMapOperation<DATA : Validatable, NESTED_DATA : Validatable, M
  * @property onUpdateCallbacks A [List] of callbacks which will be called every time a member property of [DATA] is updated
  * @property onUpdateCallbacksMap A [Map] of callbacks for specific member property of [DATA] which will be called whenever one of them is updated
  */
-data class ConfigData<DATA : Validatable>(
-    private var _serializableData: DATA,
-    val relativePath: Path,
-    val onUpdateCallbacks: MutableList<(Operation<DATA, *>) -> Unit>
-) {
+data class ConfigData<DATA : Validatable>(private var _serializableData: DATA, val relativePath: Path, val onUpdateCallbacks: MutableList<(Operation<DATA, *>) -> Unit>) {
 
     var serializableData by Delegates.observable(_serializableData) { _, _, newValue ->
         _serializableData = newValue
