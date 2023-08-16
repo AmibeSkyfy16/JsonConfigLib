@@ -9,7 +9,10 @@ data class Player(
     var uuid: String,
     var maxHomes: Int = 3,
     var cooldown: Int = 15,
-    var standStill: Int = 5
+    var standStill: Int = 5,
+    var mapWithValidatable: Map<Home, Home> = mapOf(
+        Home(110000, 100, 100, 0.0f, 0.0f, "1") to Home(111100, 100, 100, 0.0f, 0.0f, "2")
+    )
 ) : Validatable() {
 
     override fun validateImpl(errors: MutableList<String>) {
@@ -21,7 +24,6 @@ data class Player(
 
         if (cooldown < 0) errors.add("cooldown cannot have a negative value")
 
-        if (standStill != 0)
-            if (standStill < 0) errors.add("standStill cannot have a negative value")
+        if (standStill < 0) errors.add("standStill cannot have a negative value")
     }
 }

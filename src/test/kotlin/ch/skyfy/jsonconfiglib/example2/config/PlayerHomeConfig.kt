@@ -14,5 +14,5 @@ data class PlayersHomesConfig(var players: MutableList<Player>) : Validatable() 
 }
 
 class DefaultPlayerHomeConfig : Defaultable<PlayersHomesConfig> {
-    override fun getDefault() = PlayersHomesConfig(mutableListOf())
+    override fun getDefault() = PlayersHomesConfig(mutableSetOf())
 }

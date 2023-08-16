@@ -27,7 +27,7 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
 
     kMutableProperty1.set(receiver, newValue)
 
-    if (!receiver.confirmValidate(operation = operation, shouldThrowRuntimeException = false)) {
+    if (!receiver.validate(operation = operation, shouldThrowRuntimeException = false)) {
         kMutableProperty1.set(receiver, oldValue)
         return
     }
@@ -56,7 +56,7 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
 
     block.invoke(map)
 
-    if (!receiver.confirmValidate(operation = operation, shouldThrowRuntimeException = false)) {
+    if (!receiver.validate(operation = operation, shouldThrowRuntimeException = false)) {
         map.clear()
         map.putAll(oldValue)
         return
@@ -92,7 +92,7 @@ inline fun <reified DATA : Validatable, reified NESTED_DATA : Validatable, reifi
 
     block.invoke(mutableCollection)
 
-    if (!receiver.confirmValidate(operation = operation, shouldThrowRuntimeException = false)) {
+    if (!receiver.validate(operation = operation, shouldThrowRuntimeException = false)) {
         mutableCollection.clear()
         mutableCollection.addAll(oldValue)
         return

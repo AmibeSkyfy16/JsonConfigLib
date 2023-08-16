@@ -69,7 +69,7 @@ class Sample {
 
     private fun addPlayerInPlayersHomesConfig(configData: ConfigData<PlayersHomesConfig>) {
 
-        configData.updateMutableCollection<PlayersHomesConfig, Player, MutableList<Player>>(PlayersHomesConfig::players) {
+        configData.updateMutableCollection<PlayersHomesConfig, Player, MutableSet<Player>>(PlayersHomesConfig::players) {
             // Adding a first player with one home called secret base
             it.add(
                 Player(
@@ -106,7 +106,7 @@ class Sample {
     }
 
     private fun deleteSomePlayersAndSomeHomes(configData: ConfigData<PlayersHomesConfig>) {
-        configData.updateMutableCollection<PlayersHomesConfig, Player, MutableList<Player>>(PlayersHomesConfig::players) {
+        configData.updateMutableCollection<PlayersHomesConfig, Player, MutableSet<Player>>(PlayersHomesConfig::players) {
             val firstPlayer = it.first()
             it.removeAll { player ->  player != firstPlayer}
         }

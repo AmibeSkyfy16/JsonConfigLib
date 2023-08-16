@@ -80,7 +80,7 @@ data class InnerPlayer(
     var currentRank: RankTypes,
     var playerLevels: Int,
 ) : Validatable() {
-    init  { confirmValidation() }
+    init  { startValidation() }
     override fun validateImpl(errors: MutableList<String>) {
         if(playerLevels > 100)errors.add("playerLevels cannot be greater than 100 !")
     }
